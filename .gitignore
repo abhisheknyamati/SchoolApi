@@ -1,0 +1,79 @@
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+bin/
+obj/
+out/
+Debug/
+Release/
+*.suo
+*.user
+*.userosscache
+*.sln.ide
+*.sln.docstates
+
+# Visual Studio files
+.vs/
+.vscode/
+*.sln*
+*.suo
+*.user
+*.userprefs
+*.shproj
+
+# Rider files
+.idea/
+*.sln.iml
+
+# NuGet Packages
+*.nupkg
+*.snupkg
+*.nuspec
+packages/
+**/packages/*
+*.dotnet/
+project.lock.json
+project.fragment.lock.json
+project.assets.json
+
+# Visual Studio Code files
+.vscode/
+.history/
+
+# Local development files
+appsettings.Development.json
+appsettings.*.json
+*.db
+
+# Publish files
+publish/
+publishProfiles/
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+*.zip
+*.tar.gz
+
+# User secrets
+secrets.json
+*.scc
+
+# Resharper files
+_ReSharper*/
+*.[Rr]eSharper*
+
+# Backup files
+*~ 
+
+# Other files
+*.dbmdl
+*.dbproj
+*.dbschema
+
+# JetBrains Rider settings
+.idea/
+*.sln.iml
