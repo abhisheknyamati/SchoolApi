@@ -3,17 +3,20 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SchoolApi.Business.Data;
 
 #nullable disable
 
-namespace SchoolApi.API.Migrations
+namespace SchoolApi.Business.Migrations
 {
     [DbContext(typeof(SchoolAPIDbContext))]
-    partial class SchoolAPIDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241028131952_MyMigration123")]
+    partial class MyMigration123
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

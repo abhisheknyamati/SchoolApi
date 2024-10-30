@@ -5,6 +5,8 @@ using AutoMapper;
 using SchoolApi.API.Validators;
 using SchoolApi.API.DTOs;
 using SchoolApi.Business.Pagination;
+using SchoolApi.Business.Repositories;
+using SchoolApi.API.ExceptionHandler;
 
 namespace SchoolApi.API.Controllers
 {
@@ -12,156 +14,151 @@ namespace SchoolApi.API.Controllers
     [ApiController]
     public class StudentController : ControllerBase
     {
+        private readonly IStudentRepo _repo;
         private readonly IStudentService _service;
         private readonly IMapper _mapper;
 
-        public StudentController(IStudentService service, IMapper mapper)
+        public StudentController(IStudentRepo repo, IMapper mapper, IStudentService service)
         {
-            _service = service;
+            _repo = repo;
             _mapper = mapper;
+            _service = service;
         }
 
         [HttpGet("getStudents")]
         public async Task<IActionResult> GetAllStudents()
         {
-            try
+            var students = await _repo.GetAllStudents();
+            if (students == null)
             {
-                var students = await _service.GetAllStudents();
-                return Ok(students);
+                throw new Exception(ErrorMsgConstant.StudentListEmpty);
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, "An error occurred while fetching students.");
-            }
+            return Ok(students);
         }
 
         [HttpPost("addStudent")]
         public async Task<IActionResult> AddStudent([FromBody] AddStudentDto studentDto)
         {
-            try
+            var validator = new StudentValidator();
+            var result = validator.Validate(studentDto);
+
+            if (!result.IsValid)
             {
-                var validator = new StudentValidator();
-                var result = validator.Validate(studentDto);
-                if (!result.IsValid)
-                {
-                    return BadRequest(result.Errors.Select(failure =>
-                        $"Property {failure.PropertyName} failed validation. Error was: {failure.ErrorMessage}"));
-                }
-
-                var student = _mapper.Map<Student>(studentDto);
-                student.Age = _service.CalculateAge(studentDto.BirthDate);
-
-                var addedStudent = await _service.AddStudent(student);
-                if (addedStudent == null)
-                {
-                    return BadRequest("Failed to add student.");
-                }
-
-                return CreatedAtAction(nameof(GetStudentById), new { id = addedStudent.Id }, addedStudent);
+                return BadRequest(result.Errors.Select(failure =>
+                    $"Property {failure.PropertyName} failed validation. Error was: {failure.ErrorMessage}"));
             }
-            catch (Exception ex)
+
+            var student = _mapper.Map<Student>(studentDto);
+            if (studentDto.BirthDate.HasValue)
             {
-                return StatusCode(500, "An error occurred while adding the student.");
+                student.Age = _service.CalculateAge(studentDto.BirthDate.Value);
             }
+
+            var addedStudent = await _repo.AddStudent(student);
+            if (addedStudent == null)
+            {
+                return BadRequest(ErrorMsgConstant.StudentNotCreated);
+            }
+
+            return Ok(student);
         }
 
         [HttpDelete("softDelete")]
-        public async Task<IActionResult> DeleteStudent(int studentId)
+        public async Task<ActionResult> DeleteStudent(int studentId)
         {
-            try
+            var requiredStudent = await _repo.GetStudentById(studentId);
+            if (requiredStudent == null)
             {
-                var success = await _service.DeleteStudent(studentId);
-                if (!success)
-                {
-                    return NotFound(new { message = "Invalid student ID." });
-                }
+                throw new Exception(ErrorMsgConstant.StudentNotFound);
+            }
+            var success = await _repo.DeleteStudent(requiredStudent);
+            if (!success)
+            {
+                throw new Exception(ErrorMsgConstant.StudentAlreadyDeleted);
+            }
 
-                return Ok(new { message = "successfully deleted student" });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, "An error occurred while deleting the student.");
-            }
+            return Ok(requiredStudent);
         }
 
         [HttpPut("updateDetails")]
-        public async Task<IActionResult> UpdateDetails(int id, [FromBody] AddStudentDto studentDto)
+        public async Task<IActionResult> UpdateDetails(int id, [FromBody] UpdateStudentDto studentDto)
         {
-            try
+            // var validator = new StudentUpdateValidator();
+            // var result = validator.Validate(studentDto);
+
+            // if (!result.IsValid)
+            // {
+            //     return BadRequest(result.Errors.Select(failure =>
+            //         $"Property {failure.PropertyName} failed validation. Error was: {failure.ErrorMessage}"));
+            // }
+
+            var existingStudent = await _repo.GetStudentById(id);
+            if (existingStudent == null)
             {
-                var validator = new StudentValidator();
-                var result = validator.Validate(studentDto);
-
-                if (!result.IsValid)
-                {
-                    return BadRequest(result.Errors.Select(failure =>
-                        $"Property {failure.PropertyName} failed validation. Error was: {failure.ErrorMessage}"));
-                }
-
-                var student = _mapper.Map<Student>(studentDto);
-                student.Age = _service.CalculateAge(studentDto.BirthDate);
-
-                var success = await _service.UpdateDetails(id, student);
-                if (!success)
-                {
-                    return BadRequest("Couldn't save changes.");
-                }
-
-                return Ok(new { message = "Saved changes." });
+                throw new Exception(ErrorMsgConstant.StudentNotFound);
             }
-            catch (Exception ex)
+
+            if (!string.IsNullOrEmpty(studentDto.FirstName))
+                existingStudent.FirstName = studentDto.FirstName;
+            if (!string.IsNullOrEmpty(studentDto.LastName))
+                existingStudent.LastName = studentDto.LastName;
+            if (!string.IsNullOrEmpty(studentDto.Email))
+                existingStudent.Email = studentDto.Email;
+            if (!string.IsNullOrEmpty(studentDto.Phone))
+                existingStudent.Phone = studentDto.Phone;
+            if (!string.IsNullOrEmpty(studentDto.Address))
+                existingStudent.Address = studentDto.Address;
+            if (studentDto.Gender.HasValue)
+                existingStudent.Gender = studentDto.Gender.Value;
+            if (studentDto.BirthDate.HasValue)
             {
-                return StatusCode(500, "An error occurred while updating student details.");
+                existingStudent.BirthDate = studentDto.BirthDate.Value;
+                existingStudent.Age = _service.CalculateAge(studentDto.BirthDate.Value);
             }
+
+            var success = await _repo.UpdateDetails(existingStudent);
+            // if (success == existingStudent)
+            // {
+            //     return BadRequest(ErrorMsgConstant.StudentNotUpdated);
+            // }
+
+            return Ok(success);
         }
+
 
         [HttpGet]
         public async Task<ActionResult<PagedResponse<Student>>> GetPagedStudents([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 5, [FromQuery] string searchTerm = "")
         {
-            try
+            if (pageNumber < 1)
             {
-                if (pageNumber < 1)
-                {
-                    return BadRequest("Page number must be greater than 0.");
-                }
-
-                if (pageSize <= 0 || pageSize > 100)
-                {
-                    return BadRequest("Page size must be between 1 and 100.");
-                }
-
-                PagedResponse<Student> result = await _service.GetStudents(pageNumber, pageSize, searchTerm);
-
-                if (result.Data.Count == 0)
-                {
-                    return NotFound(new { message = "No students found." });
-                }
-
-                return Ok(result);
+                throw new Exception(ErrorMsgConstant.PaginationPageNumer);
             }
-            catch (Exception ex)
+
+            if (pageSize <= 0 || pageSize > 100)
             {
-                return StatusCode(500, "An error occurred while fetching paged students.");
+                throw new Exception(ErrorMsgConstant.PaginationPageSize);
             }
+
+            PagedResponse<Student> result = await _repo.GetStudents(pageNumber, pageSize, searchTerm);
+
+            if (result.Data.Count == 0)
+            {
+                throw new Exception(ErrorMsgConstant.StudentListEmpty);
+            }
+
+            return Ok(result);
         }
 
         [HttpGet("getStudentById")]
         public async Task<IActionResult> GetStudentById(int id)
         {
-            try
+            var student = await _repo.GetStudentById(id);
+            if (student == null)
             {
-                var student = await _service.GetStudentById(id);
-                if (student == null)
-                {
-                    return NotFound(new { message = "Student not found." });
-                }
+                throw new Exception(ErrorMsgConstant.StudentNotFound);
+            }
 
-                return Ok(student);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, "An error occurred while fetching the student.");
-            }
+            return Ok(student);
         }
     }
 }

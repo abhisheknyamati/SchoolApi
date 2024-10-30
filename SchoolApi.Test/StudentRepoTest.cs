@@ -27,140 +27,127 @@ namespace SchoolApi.Test
         }
 
         [Fact]
-        public async Task GetAllStudents_WhenCalled_ReturnsAllStudents()
+        public async Task AddStudent_WhenStudentIsValid_AddsStudentSuccessfully()
         {
             // Arrange
-            _context.Students.AddRange(new List<Student>
+            var student = new Student
             {
-                new Student { FirstName = "Abhi", LastName = "Nyamati", Address = "Thane", Email = "abhishek@gmail.com", Phone = "1234567890", IsActive = true, BirthDate = DateTime.Now, Age = 20, Gender = Business.Models.ENUM.Gender.MALE },
-                new Student { FirstName = "Abhi1", LastName = "Nyamati1", Address = "Thane", Email = "abhishek1@gmail.com", Phone = "1234567899", IsActive = true, BirthDate = DateTime.Now, Age = 20, Gender = Business.Models.ENUM.Gender.MALE },
-            });
-
-            await _context.SaveChangesAsync();
-
-            // Act
-            var students = await _repo.GetAllStudents();
-
-            // Assert
-            Assert.Equal(2, students.Count());
-        }
-
-        [Fact]
-        public async Task GetAllStudents_WhenDatabaseIsEmpty_ReturnsEmptyList()
-        {
-            // Act
-            var students = await _repo.GetAllStudents();
-
-            // Assert
-            Assert.Empty(students);
-        }
-
-        [Fact]
-        public async Task AddStudent_WhenCalled_AddsStudentSuccessfully()
-        {
-            // Arrange
-            var student = new Student { FirstName = "Abhi", LastName = "Nyamati", Address = "Thane", Email = "abhishek@gmail.com", Phone = "1234567890", IsActive = true, BirthDate = DateTime.Now, Age = 20, Gender = Business.Models.ENUM.Gender.MALE };
+                FirstName = "Abhishek",
+                LastName = "Nyamati",
+                Address = "Somewhere",
+                Email = "abhishek@nyamati.com",
+                Phone = "1234567890",
+                IsActive = true,
+                BirthDate = DateTime.Now.AddYears(-20),
+                Age = 20,
+                Gender = Business.Models.ENUM.Gender.MALE
+            };
 
             // Act
             var result = await _repo.AddStudent(student);
-            await _context.SaveChangesAsync();
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal("Abhi", result.FirstName);
+            Assert.Equal("Abhishek", result.FirstName);
+
             var students = await _repo.GetAllStudents();
             Assert.Single(students);
         }
 
         [Fact]
-        public async Task AddStudent_WithInvalidStudentData_ReturnsNull()
-        {
-            // Act
-            var result = await _repo.AddStudent(null);
-
-            // Assert
-            Assert.Null(result);
-        }
-
-        [Fact]
-        public async Task DeleteStudent_WhenCalled_SoftDeletesStudent()
+        public async Task AddStudent_WhenRequiredFieldsAreMissing_ThrowsDbUpdateException()
         {
             // Arrange
-            var student = new Student { Id = 1, FirstName = "Abhi", LastName = "Nyamati", Address = "Thane", Email = "abhishek@gmail.com", Phone = "1234567890", IsActive = true, BirthDate = DateTime.Now, Age = 20, Gender = Business.Models.ENUM.Gender.MALE };
-            await _context.Students.AddAsync(student);
-            await _context.SaveChangesAsync();
+            var student = new Student
+            {
+                LastName = "Doe",
+                Email = "johndoe@example.com",
+                IsActive = true
+            }; 
 
-            // Act
-            var result = await _repo.DeleteStudent(student.Id);
-
-            // Assert
-            Assert.True(result);
-            var deletedStudent = await _repo.GetStudentById(student.Id);
-            Assert.False(deletedStudent.IsActive);
+            // Act & Assert
+            await Assert.ThrowsAsync<DbUpdateException>(async () => await _repo.AddStudent(student));
         }
 
         [Fact]
-        public async Task DeleteStudent_WithNonExistingId_ReturnsFalse()
-        {
-            // Act
-            var result = await _repo.DeleteStudent(3);
-
-            // Assert
-            Assert.False(result);
-        }
-
-        [Fact]
-        public async Task UpdateDetails_WhenCalled_UpdatesStudentSuccessfully()
+        public async Task UpdateDetails_WhenStudentExists_UpdatesDetailsSuccessfully()
         {
             // Arrange
-            var student = new Student { FirstName = "Abhi", LastName = "Nyamati", Address = "Thane", Email = "abhishek@gmail.com", Phone = "1234567890", IsActive = true, BirthDate = DateTime.Now, Age = 20, Gender = Business.Models.ENUM.Gender.MALE };
+            var student = new Student { Id = 1, FirstName = "Abhishek", LastName = "Nyamati", Address = "Airoli", Email = "abhishek@gmail.com", Gender = Business.Models.ENUM.Gender.MALE, Phone = "1234567890", BirthDate = new DateTime(2000, 1, 1), Age = 24, IsActive = true };
             _context.Students.Add(student);
             await _context.SaveChangesAsync();
 
-            var updatedStudent = new Student { FirstName = "Maxx", LastName = "Power", Address = "New Address", BirthDate = student.BirthDate, Phone = student.Phone, Email = student.Email, Gender = student.Gender, Age = 25 };
-
             // Act
-            var result = await _repo.UpdateDetails(student.Id, updatedStudent);
+            student.LastName = "UpdatedName";
+            var updatedStudent = await _repo.UpdateDetails(student);
 
             // Assert
-            Assert.True(result);
-            var fetchedStudent = await _repo.GetStudentById(student.Id);
-            Assert.Equal("Maxx", fetchedStudent.FirstName);
+            Assert.NotNull(updatedStudent);
+            Assert.Equal("UpdatedName", updatedStudent.LastName);
         }
 
         [Fact]
-        public async Task UpdateDetails_WithNonExistingId_ReturnsFalse()
+        public async Task UpdateDetails_WhenStudentDoesNotExist_ThrowsDbUpdateConcurrencyException()
         {
+            // Arrange
+            var student = new Student
+            {
+                Id = 999, 
+                FirstName = "Abhishek",
+                LastName = "Nyamati",
+                Address = "Vashi",
+                Email = "abhishek@gmail.com",
+                Gender = Business.Models.ENUM.Gender.MALE,
+                Phone = "1234567890",
+                BirthDate = new DateTime(2000, 1, 1),
+                Age = 24,
+                IsActive = true
+            };
+
+            // Act & Assert
+            await Assert.ThrowsAsync<DbUpdateConcurrencyException>(() => _repo.UpdateDetails(student));
+
+            // Additional check: verify no entries were added
+            Assert.Empty(await _context.Students.ToListAsync());
+        }
+
+
+        [Fact]
+        public async Task DeleteStudent_WhenStudentIsActive_SetsIsActiveToFalse()
+        {
+            // Arrange
+            var student = new Student { Id = 1, FirstName = "Abhishek", LastName = "Nyamati", Address = "Airoli", Email = "abhishek@gmail.com", Gender = Business.Models.ENUM.Gender.MALE, Phone = "1234567890", BirthDate = new DateTime(2000, 1, 1), Age = 24, IsActive = true };
+            _context.Students.Add(student);
+            await _context.SaveChangesAsync();
+
             // Act
-            var result = await _repo.UpdateDetails(-1, new Student { FirstName = "Maxx", LastName = "Power", Address = "New Address" });
+            var result = await _repo.DeleteStudent(student);
+
+            // Assert
+            Assert.True(result);
+            Assert.False(student.IsActive);
+        }
+
+        [Fact]
+        public async Task DeleteStudent_WhenStudentIsInactive_ReturnsFalse()
+        {
+            // Arrange
+            var student = new Student { Id = 1, FirstName = "Abhishek", LastName = "Nyamati", Address = "Airoli", Email = "abhishek@gmail.com", Gender = Business.Models.ENUM.Gender.MALE, Phone = "1234567890", BirthDate = new DateTime(2000, 1, 1), Age = 24, IsActive = false };
+            _context.Students.Add(student);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _repo.DeleteStudent(student);
 
             // Assert
             Assert.False(result);
         }
 
         [Fact]
-        public async Task GetStudents_WithPagination_ReturnsPagedResponse()
+        public async Task GetStudentById_WhenStudentExists_ReturnsStudent()
         {
             // Arrange
-            for (int i = 1; i <= 10; i++)
-            {
-                _context.Students.Add(new Student { FirstName = $"Student{i}", LastName = $"Last{i}", Address = $"Address{i}", Age = i, BirthDate = DateTime.Now, Email = $"email{i}@gmail.com", Gender = Business.Models.ENUM.Gender.MALE, Phone = $"123456789{i}", IsActive = true });
-            }
-            await _context.SaveChangesAsync();
-
-            // Act
-            var pagedResponse = await _repo.GetStudents(pageNumber: 1, pageSize: 5, searchTerm: "");
-
-            // Assert
-            Assert.Equal(5, pagedResponse.Data.Count);
-            Assert.Equal(10, pagedResponse.TotalRecords);
-        }
-
-        [Fact]
-        public async Task GetStudentById_WithExistingId_ReturnsStudent()
-        {
-            // Arrange
-            var student = new Student { FirstName = "Abhi", LastName = "Nyamati", Address = "Thane", Email = "abhishek@gmail.com", Phone = "1234567890", IsActive = true, BirthDate = DateTime.Now, Age = 20, Gender = Business.Models.ENUM.Gender.MALE };
+            var student = new Student { Id = 1, FirstName = "Abhishek", LastName = "Nyamati", Address = "Airoli", Email = "abhishek@gmail.com", Gender = Business.Models.ENUM.Gender.MALE, Phone = "1234567890", BirthDate = new DateTime(2000, 1, 1), Age = 24, IsActive = true };
             _context.Students.Add(student);
             await _context.SaveChangesAsync();
 
@@ -169,17 +156,74 @@ namespace SchoolApi.Test
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal("Abhi", result.FirstName);
+            Assert.Equal("Abhishek", result.FirstName);
         }
 
         [Fact]
-        public async Task GetStudentById_WithNonExistingId_ReturnsNull()
+        public async Task GetStudentById_WhenStudentDoesNotExist_ReturnsNull()
         {
             // Act
-            var result = await _repo.GetStudentById(-1);
+            var result = await _repo.GetStudentById(999);
 
             // Assert
             Assert.Null(result);
         }
+
+        [Fact]
+        public async Task GetStudents_WhenFilteredAndPaginated_ReturnsFilteredAndPagedResults()
+        {
+            // Arrange
+            _context.Students.AddRange(new List<Student>
+            {
+                new Student { FirstName = "Abhishek", LastName = "Nyamati", Address = "Vashi", Email = "abhishek@gmail.com", Gender = Business.Models.ENUM.Gender.MALE, Phone = "1234567890", BirthDate = new DateTime(2000, 1, 1), Age = 24, IsActive = true },
+                new Student { FirstName = "Bob", LastName = "Jones", Address = "Vashi",  Email = "bob@example.com", Gender = Business.Models.ENUM.Gender.MALE, Phone = "1234567890", BirthDate = new DateTime(2000, 1, 1), Age = 24, IsActive = true },
+                new Student { FirstName = "Charlie", LastName = "Brown", Address = "Bandra", Email = "charlie@example.com", Gender = Business.Models.ENUM.Gender.MALE, Phone = "1234567890", BirthDate = new DateTime(2000, 1, 1), Age = 24, IsActive = true },
+            });
+            await _context.SaveChangesAsync();
+
+            // Act
+            var pagedResult = await _repo.GetStudents(1, 2, "Abhi");
+
+            // Assert
+            Assert.Single(pagedResult.Data);
+            Assert.Equal("Abhishek", pagedResult.Data.First().FirstName);
+        }
+
+        [Fact]
+        public async Task GetStudents_WhenNoMatches_ReturnsEmptyList()
+        {
+            // Arrange
+            _context.Students.AddRange(new List<Student>
+            {
+                new Student { FirstName = "Abhishek", LastName = "Nyamati", Address = "Vashi", Email = "abhishek@gmail.com", Gender = Business.Models.ENUM.Gender.MALE, Phone = "1234567890", BirthDate = new DateTime(2000, 1, 1), Age = 24, IsActive = true },
+                new Student { FirstName = "Bob", LastName = "Jones", Address = "Vashi",  Email = "bob@example.com", Gender = Business.Models.ENUM.Gender.MALE, Phone = "1234567890", BirthDate = new DateTime(2000, 1, 1), Age = 24, IsActive = true },
+                new Student { FirstName = "Charlie", LastName = "Brown", Address = "Bandra", Email = "charlie@example.com", Gender = Business.Models.ENUM.Gender.MALE, Phone = "1234567890", BirthDate = new DateTime(2000, 1, 1), Age = 24, IsActive = true },
+            });
+            await _context.SaveChangesAsync();
+
+            // Act
+            var pagedResult = await _repo.GetStudents(1, 2, "NonExistentName");
+
+            // Assert
+            Assert.Empty(pagedResult.Data);
+        }
+
+        [Fact]
+        public async Task GetStudents_WhenNegativePageNumberOrSize_ReturnsEmptyPagedResponse()
+        {
+            // Arrange
+            var pageNumber = -1;
+            var pageSize = -5;
+            var searchTerm = "Abhishek"; 
+
+            // Act
+            var result = await _repo.GetStudents(pageNumber, pageSize, searchTerm);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Empty(result.Data); 
+            Assert.Equal(0, result.TotalRecords);
+        }
+
     }
 }

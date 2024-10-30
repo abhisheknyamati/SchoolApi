@@ -3,6 +3,10 @@ using SchoolApi.Business.Repositories;
 using SchoolApi.Business.Services;
 using SchoolApi.Business.Data;
 using Microsoft.EntityFrameworkCore;
+using SchoolApi.API.ExceptionHandler;
+using FluentValidation.AspNetCore;
+using FluentValidation;
+using SchoolApi.API.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +21,13 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddAutoMapper(typeof(StudentProfile).Assembly);
+builder.Services.AddTransient<GlobalExceptionHandlerMiddleware>();
+
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<StudentValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<StudentUpdateValidator>();
+
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins",
@@ -29,12 +40,15 @@ builder.Services.AddCors(options =>
 });
 
 var serverVersion = ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("Localhost"));
-builder.Services.AddDbContext<SchoolAPIDbContext>(options =>
-           options.UseMySql(builder.Configuration.GetConnectionString("Localhost"), serverVersion,
-               b => b.MigrationsAssembly("SchoolApi.API"))
-               .EnableDetailedErrors()
-               .EnableSensitiveDataLogging());
+//builder.Services.AddDbContext<SchoolAPIDbContext>(options =>
+//           options.UseMySql(builder.Configuration.GetConnectionString("Localhost"), serverVersion,
+//               b => b.MigrationsAssembly("SchoolApi.API"))
+//               .EnableDetailedErrors()
+//               .EnableSensitiveDataLogging());
 
+builder.Services.AddDbContext<SchoolAPIDbContext>(options => {
+    options.UseMySql(builder.Configuration.GetConnectionString("Localhost"), serverVersion).EnableDetailedErrors();
+});
 
 var app = builder.Build();
 
@@ -45,6 +59,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowAllOrigins");
+
+app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
 app.UseHttpsRedirection();
 
