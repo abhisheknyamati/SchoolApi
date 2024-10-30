@@ -106,8 +106,6 @@ namespace SchoolApi.Test
 
             // Act & Assert
             await Assert.ThrowsAsync<DbUpdateConcurrencyException>(() => _repo.UpdateDetails(student));
-
-            // Additional check: verify no entries were added
             Assert.Empty(await _context.Students.ToListAsync());
         }
 

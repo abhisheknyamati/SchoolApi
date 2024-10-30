@@ -57,7 +57,7 @@ namespace SchoolApi.API.Controllers
             var addedStudent = await _repo.AddStudent(student);
             if (addedStudent == null)
             {
-                return BadRequest(ErrorMsgConstant.StudentNotCreated);
+                throw new Exception(ErrorMsgConstant.StudentNotCreated);
             }
 
             return Ok(student);
@@ -69,7 +69,7 @@ namespace SchoolApi.API.Controllers
             var requiredStudent = await _repo.GetStudentById(studentId);
             if (requiredStudent == null)
             {
-                throw new Exception(ErrorMsgConstant.StudentNotFound);
+                throw new KeyNotFoundException(ErrorMsgConstant.StudentNotFound);
             }
             var success = await _repo.DeleteStudent(requiredStudent);
             if (!success)
@@ -95,7 +95,7 @@ namespace SchoolApi.API.Controllers
             var existingStudent = await _repo.GetStudentById(id);
             if (existingStudent == null)
             {
-                throw new Exception(ErrorMsgConstant.StudentNotFound);
+                throw new KeyNotFoundException(ErrorMsgConstant.StudentNotFound);
             }
 
             if (!string.IsNullOrEmpty(studentDto.FirstName))
@@ -143,7 +143,7 @@ namespace SchoolApi.API.Controllers
 
             if (result.Data.Count == 0)
             {
-                throw new Exception(ErrorMsgConstant.StudentListEmpty);
+                throw new KeyNotFoundException(ErrorMsgConstant.StudentListEmpty);
             }
 
             return Ok(result);
@@ -155,7 +155,7 @@ namespace SchoolApi.API.Controllers
             var student = await _repo.GetStudentById(id);
             if (student == null)
             {
-                throw new Exception(ErrorMsgConstant.StudentNotFound);
+                throw new KeyNotFoundException(ErrorMsgConstant.StudentNotFound);
             }
 
             return Ok(student);
