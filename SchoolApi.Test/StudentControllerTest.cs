@@ -46,7 +46,8 @@ namespace SchoolApi.Tests
                 .RuleFor(s => s.Address, f => f.Address.FullAddress())
                 .RuleFor(s => s.BirthDate, f => f.Date.Past(20))
                 .RuleFor(s => s.Gender, f => f.PickRandom<Gender>())
-                .RuleFor(s => s.Age, f => f.Random.Int(18, 25));
+                .RuleFor(s => s.Age, f => f.Random.Int(18, 25))
+                .RuleFor(s => s.Gender, f => f.PickRandom<Gender>());
 
             _addStudentDtoFaker = new Faker<AddStudentDto>()
                 .RuleFor(s => s.FirstName, f => f.Name.FirstName())
@@ -54,7 +55,8 @@ namespace SchoolApi.Tests
                 .RuleFor(s => s.Email, f => f.Internet.Email())
                 .RuleFor(s => s.Phone, f => f.Phone.PhoneNumber())
                 .RuleFor(s => s.Address, f => f.Address.FullAddress())
-                .RuleFor(s => s.BirthDate, f => f.Date.Past(20));
+                .RuleFor(s => s.BirthDate, f => f.Date.Past(20))
+                .RuleFor(s => s.Gender, f => f.PickRandom<Gender>());
         }
 
         [Fact]

@@ -2,13 +2,15 @@ using Microsoft.EntityFrameworkCore;
 using SchoolApi.Business.Data;
 using SchoolApi.Business.Models;
 using SchoolApi.Business.Repositories;
-
+using Bogus;
+using SchoolApi.Business.Models.ENUM;
 namespace SchoolApi.Test
 {
     public class StudentRepoTest : IAsyncLifetime
     {
         private SchoolAPIDbContext _context;
         private IStudentRepo _repo;
+        private Faker<Student> _studentFaker;
 
         public async Task InitializeAsync()
         {
@@ -18,6 +20,18 @@ namespace SchoolApi.Test
 
             _context = new SchoolAPIDbContext(options);
             _repo = new StudentRepo(_context);
+
+            _studentFaker = new Faker<Student>()
+                .RuleFor(s => s.Id, f => f.IndexFaker + 1)
+                .RuleFor(s => s.FirstName, f => f.Name.FirstName())
+                .RuleFor(s => s.LastName, f => f.Name.LastName())
+                .RuleFor(s => s.Email, f => f.Internet.Email())
+                .RuleFor(s => s.Phone, f => f.Phone.PhoneNumber())
+                .RuleFor(s => s.Address, f => f.Address.FullAddress())
+                .RuleFor(s => s.BirthDate, f => f.Date.Past(20))
+                .RuleFor(s => s.Gender, f => f.PickRandom<Gender>())
+                .RuleFor(s => s.Age, f => f.Random.Int(18, 25))
+                .RuleFor(s => s.Gender, f => f.PickRandom<Gender>());
         }
 
         public async Task DisposeAsync()
@@ -30,19 +44,8 @@ namespace SchoolApi.Test
         public async Task AddStudent_WhenStudentIsValid_AddsStudentSuccessfully()
         {
             // Arrange
-            var student = new Student
-            {
-                FirstName = "Abhishek",
-                LastName = "Nyamati",
-                Address = "Somewhere",
-                Email = "abhishek@nyamati.com",
-                Phone = "1234567890",
-                IsActive = true,
-                BirthDate = DateTime.Now.AddYears(-20),
-                Age = 20,
-                Gender = Business.Models.ENUM.Gender.MALE
-            };
-
+            var student = _studentFaker.Generate();
+            student.FirstName = "Abhishek"; 
             // Act
             var result = await _repo.AddStudent(student);
 
@@ -54,7 +57,7 @@ namespace SchoolApi.Test
             Assert.Single(students);
         }
 
-        [Fact] //
+        [Fact] // idk
         public async Task AddStudent_WhenRequiredFieldsAreMissing_ThrowsDbUpdateException()
         {
             // Arrange
@@ -63,7 +66,7 @@ namespace SchoolApi.Test
                 LastName = "Doe",
                 Email = "johndoe@example.com",
                 IsActive = true
-            }; 
+            };
 
             // Act & Assert
             await Assert.ThrowsAsync<DbUpdateException>(async () => await _repo.AddStudent(student));
@@ -73,7 +76,7 @@ namespace SchoolApi.Test
         public async Task UpdateDetails_WhenStudentExists_UpdatesDetailsSuccessfully()
         {
             // Arrange
-            var student = new Student { Id = 1, FirstName = "Abhishek", LastName = "Nyamati", Address = "Airoli", Email = "abhishek@gmail.com", Gender = Business.Models.ENUM.Gender.MALE, Phone = "1234567890", BirthDate = new DateTime(2000, 1, 1), Age = 24, IsActive = true };
+            var student = _studentFaker.Generate();
             _context.Students.Add(student);
             await _context.SaveChangesAsync();
 
@@ -90,19 +93,7 @@ namespace SchoolApi.Test
         public async Task UpdateDetails_WhenStudentDoesNotExist_ThrowsDbUpdateConcurrencyException()
         {
             // Arrange
-            var student = new Student
-            {
-                Id = 999, 
-                FirstName = "Abhishek",
-                LastName = "Nyamati",
-                Address = "Vashi",
-                Email = "abhishek@gmail.com",
-                Gender = Business.Models.ENUM.Gender.MALE,
-                Phone = "1234567890",
-                BirthDate = new DateTime(2000, 1, 1),
-                Age = 24,
-                IsActive = true
-            };
+            var student = _studentFaker.Generate();
 
             // Act & Assert
             await Assert.ThrowsAsync<DbUpdateConcurrencyException>(() => _repo.UpdateDetails(student));
@@ -114,7 +105,8 @@ namespace SchoolApi.Test
         public async Task DeleteStudent_WhenStudentIsActive_SetsIsActiveToFalse()
         {
             // Arrange
-            var student = new Student { Id = 1, FirstName = "Abhishek", LastName = "Nyamati", Address = "Airoli", Email = "abhishek@gmail.com", Gender = Business.Models.ENUM.Gender.MALE, Phone = "1234567890", BirthDate = new DateTime(2000, 1, 1), Age = 24, IsActive = true };
+            var student = _studentFaker.Generate();
+            student.IsActive = true;
             _context.Students.Add(student);
             await _context.SaveChangesAsync();
 
@@ -130,7 +122,8 @@ namespace SchoolApi.Test
         public async Task DeleteStudent_WhenStudentIsInactive_ReturnsFalse()
         {
             // Arrange
-            var student = new Student { Id = 1, FirstName = "Abhishek", LastName = "Nyamati", Address = "Airoli", Email = "abhishek@gmail.com", Gender = Business.Models.ENUM.Gender.MALE, Phone = "1234567890", BirthDate = new DateTime(2000, 1, 1), Age = 24, IsActive = false };
+            var student = _studentFaker.Generate();
+            student.IsActive = false;
             _context.Students.Add(student);
             await _context.SaveChangesAsync();
 
@@ -145,7 +138,8 @@ namespace SchoolApi.Test
         public async Task GetStudentById_WhenStudentExists_ReturnsStudent()
         {
             // Arrange
-            var student = new Student { Id = 1, FirstName = "Abhishek", LastName = "Nyamati", Address = "Airoli", Email = "abhishek@gmail.com", Gender = Business.Models.ENUM.Gender.MALE, Phone = "1234567890", BirthDate = new DateTime(2000, 1, 1), Age = 24, IsActive = true };
+            var student = _studentFaker.Generate();
+            student.FirstName = "Abhishek";
             _context.Students.Add(student);
             await _context.SaveChangesAsync();
 
@@ -193,9 +187,8 @@ namespace SchoolApi.Test
             // Arrange
             _context.Students.AddRange(new List<Student>
             {
-                new Student { FirstName = "Abhishek", LastName = "Nyamati", Address = "Vashi", Email = "abhishek@gmail.com", Gender = Business.Models.ENUM.Gender.MALE, Phone = "1234567890", BirthDate = new DateTime(2000, 1, 1), Age = 24, IsActive = true },
-                new Student { FirstName = "Bob", LastName = "Jones", Address = "Vashi",  Email = "bob@example.com", Gender = Business.Models.ENUM.Gender.MALE, Phone = "1234567890", BirthDate = new DateTime(2000, 1, 1), Age = 24, IsActive = true },
-                new Student { FirstName = "Charlie", LastName = "Brown", Address = "Bandra", Email = "charlie@example.com", Gender = Business.Models.ENUM.Gender.MALE, Phone = "1234567890", BirthDate = new DateTime(2000, 1, 1), Age = 24, IsActive = true },
+                _studentFaker.Generate(),    
+                _studentFaker.Generate(),    
             });
             await _context.SaveChangesAsync();
 
@@ -212,14 +205,14 @@ namespace SchoolApi.Test
             // Arrange
             var pageNumber = -1;
             var pageSize = -5;
-            var searchTerm = "Abhishek"; 
+            var searchTerm = "Abhishek";
 
             // Act
             var result = await _repo.GetStudents(pageNumber, pageSize, searchTerm);
 
             // Assert
             Assert.NotNull(result);
-            Assert.Empty(result.Data); 
+            Assert.Empty(result.Data);
             Assert.Equal(0, result.TotalRecords);
         }
 
