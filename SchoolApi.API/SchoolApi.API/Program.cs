@@ -21,7 +21,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddAutoMapper(typeof(StudentProfile).Assembly);
-builder.Services.AddTransient<GlobalExceptionHandlerMiddleware>();
+// builder.Services.AddTransient<GlobalExceptionHandlerMiddleware>();
 
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<StudentValidator>();
@@ -57,6 +57,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
 app.UseCors("AllowAllOrigins");
 

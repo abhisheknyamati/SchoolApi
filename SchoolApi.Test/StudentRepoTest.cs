@@ -54,7 +54,7 @@ namespace SchoolApi.Test
             Assert.Single(students);
         }
 
-        [Fact]
+        [Fact] //
         public async Task AddStudent_WhenRequiredFieldsAreMissing_ThrowsDbUpdateException()
         {
             // Arrange

@@ -7,6 +7,7 @@ using SchoolApi.API.DTOs;
 using SchoolApi.Business.Pagination;
 using SchoolApi.Business.Repositories;
 using SchoolApi.API.ExceptionHandler;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace SchoolApi.API.Controllers
 {
@@ -29,10 +30,11 @@ namespace SchoolApi.API.Controllers
         public async Task<IActionResult> GetAllStudents()
         {
             var students = await _repo.GetAllStudents();
-            if (students == null)
+            if (students == null || !students.Any())
             {
-                throw new Exception(ErrorMsgConstant.StudentListEmpty);
+                return NotFound(ErrorMsgConstant.StudentListEmpty);
             }
+
             return Ok(students);
         }
 

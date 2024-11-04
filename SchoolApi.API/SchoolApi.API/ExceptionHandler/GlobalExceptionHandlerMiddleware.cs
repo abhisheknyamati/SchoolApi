@@ -3,20 +3,22 @@ using SchoolApi.API.DTOs;
 
 namespace SchoolApi.API.ExceptionHandler
 {
-    public class GlobalExceptionHandlerMiddleware : IMiddleware
+    public class GlobalExceptionHandlerMiddleware 
     {
         private readonly ILogger<GlobalExceptionHandlerMiddleware> _logger;
+        private readonly RequestDelegate _next;
 
-        public GlobalExceptionHandlerMiddleware(ILogger<GlobalExceptionHandlerMiddleware> logger)
+        public GlobalExceptionHandlerMiddleware(ILogger<GlobalExceptionHandlerMiddleware> logger, RequestDelegate next)
         {
             _logger = logger;
+            _next = next;
         }
 
-        public async Task InvokeAsync(HttpContext context, RequestDelegate next)
+        public async Task InvokeAsync(HttpContext context)
         {
             try
             {
-                await next(context);
+                await _next(context);
             }
             catch (Exception ex)
             {
@@ -26,6 +28,12 @@ namespace SchoolApi.API.ExceptionHandler
 
         private Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
+            // if (context.Response.HasStarted)
+            // {
+            //     return Task.CompletedTask; 
+            // }
+
+            // var traceId = context.TraceIdentifier.ToString(); 
             var traceId = Guid.NewGuid();
             _logger.LogError($"TraceId: {traceId}, Path: {context.Request.Path}, Method: {context.Request.Method}, " +
                              $"Exception: {exception.Message}, StackTrace: {exception.StackTrace}");
