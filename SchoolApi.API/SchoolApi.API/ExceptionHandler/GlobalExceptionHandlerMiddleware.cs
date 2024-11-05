@@ -1,6 +1,7 @@
 using System.Net;
 using SchoolApi.API.DTOs;
 using FluentValidation;
+using Serilog;
 
 namespace SchoolApi.API.ExceptionHandler
 {
@@ -64,8 +65,8 @@ namespace SchoolApi.API.ExceptionHandler
         private Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             var traceId = Guid.NewGuid();
-            _logger.LogError($"TraceId: {traceId}, Path: {context.Request.Path}, Method: {context.Request.Method}, " +
-                             $"Exception: {exception.Message}, StackTrace: {exception.StackTrace}");
+            Log.Error(exception, $"TraceId: {traceId}, Path: {context.Request.Path}, Method: {context.Request.Method}, " +
+                         $"Exception: {exception.Message}, StackTrace: {exception.StackTrace}");
 
             context.Response.ContentType = "application/json";
 

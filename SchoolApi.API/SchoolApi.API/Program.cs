@@ -10,8 +10,15 @@ using SchoolApi.API.DTOs;
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using FluentValidation;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug() 
+    .WriteTo.Console()    
+    .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day) 
+    .CreateLogger();
 
 builder.Services.AddControllers(options =>
 {
