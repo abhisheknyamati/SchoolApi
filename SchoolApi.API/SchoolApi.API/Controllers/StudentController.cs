@@ -41,15 +41,6 @@ namespace SchoolApi.API.Controllers
         [HttpPost("addStudent")]
         public async Task<IActionResult> AddStudent([FromBody] AddStudentDto studentDto)
         {
-            var validator = new StudentValidator();
-            var result = validator.Validate(studentDto);
-
-            if (!result.IsValid)
-            {
-                return BadRequest(result.Errors.Select(failure =>
-                    $"Property {failure.PropertyName} failed validation. Error was: {failure.ErrorMessage}"));
-            }
-
             var student = _mapper.Map<Student>(studentDto);
             if (studentDto.BirthDate.HasValue)
             {
@@ -69,9 +60,9 @@ namespace SchoolApi.API.Controllers
         public async Task<ActionResult> DeleteStudent(int studentId)
         {
             var requiredStudent = await _repo.GetStudentById(studentId);
-            if (requiredStudent == null)
+            if(requiredStudent == null)
             {
-                throw new KeyNotFoundException(ErrorMsgConstant.StudentNotFound);
+                return NotFound(ErrorMsgConstant.StudentNotFound);
             }
             var success = await _repo.DeleteStudent(requiredStudent);
             if (!success)
@@ -85,15 +76,6 @@ namespace SchoolApi.API.Controllers
         [HttpPut("updateDetails")]
         public async Task<IActionResult> UpdateDetails(int id, [FromBody] UpdateStudentDto studentDto)
         {
-            // var validator = new StudentUpdateValidator();
-            // var result = validator.Validate(studentDto);
-
-            // if (!result.IsValid)
-            // {
-            //     return BadRequest(result.Errors.Select(failure =>
-            //         $"Property {failure.PropertyName} failed validation. Error was: {failure.ErrorMessage}"));
-            // }
-
             var existingStudent = await _repo.GetStudentById(id);
             if (existingStudent == null)
             {

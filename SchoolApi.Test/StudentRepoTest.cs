@@ -26,12 +26,13 @@ namespace SchoolApi.Test
                 .RuleFor(s => s.FirstName, f => f.Name.FirstName())
                 .RuleFor(s => s.LastName, f => f.Name.LastName())
                 .RuleFor(s => s.Email, f => f.Internet.Email())
-                .RuleFor(s => s.Phone, f => f.Phone.PhoneNumber())
+                .RuleFor(s => s.Phone, f => f.Random.Replace("##########"))
                 .RuleFor(s => s.Address, f => f.Address.FullAddress())
                 .RuleFor(s => s.BirthDate, f => f.Date.Past(20))
                 .RuleFor(s => s.Gender, f => f.PickRandom<Gender>())
                 .RuleFor(s => s.Age, f => f.Random.Int(18, 25))
-                .RuleFor(s => s.Gender, f => f.PickRandom<Gender>());
+                .RuleFor(s => s.Gender, f => f.PickRandom<Gender>())
+                .RuleFor(s => s.IsActive, f => true);
         }
 
         public async Task DisposeAsync()
@@ -63,8 +64,8 @@ namespace SchoolApi.Test
             // Arrange
             var student = new Student
             {
-                LastName = "Doe",
-                Email = "johndoe@example.com",
+                LastName = "awerwe",
+                Email = "werwerw@qweqwe.com",
                 IsActive = true
             };
 
@@ -106,7 +107,6 @@ namespace SchoolApi.Test
         {
             // Arrange
             var student = _studentFaker.Generate();
-            student.IsActive = true;
             _context.Students.Add(student);
             await _context.SaveChangesAsync();
 
@@ -167,10 +167,10 @@ namespace SchoolApi.Test
             // Arrange
             _context.Students.AddRange(new List<Student>
             {
-                new Student { FirstName = "Abhishek", LastName = "Nyamati", Address = "Vashi", Email = "abhishek@gmail.com", Gender = Business.Models.ENUM.Gender.MALE, Phone = "1234567890", BirthDate = new DateTime(2000, 1, 1), Age = 24, IsActive = true },
-                new Student { FirstName = "Bob", LastName = "Jones", Address = "Vashi",  Email = "bob@example.com", Gender = Business.Models.ENUM.Gender.MALE, Phone = "1234567890", BirthDate = new DateTime(2000, 1, 1), Age = 24, IsActive = true },
-                new Student { FirstName = "Charlie", LastName = "Brown", Address = "Bandra", Email = "charlie@example.com", Gender = Business.Models.ENUM.Gender.MALE, Phone = "1234567890", BirthDate = new DateTime(2000, 1, 1), Age = 24, IsActive = true },
-            });
+                new Student {Id = 10, FirstName = "Abhishek", LastName = "Nyamati", Address = "Vashi", Email = "abhishek@gmail.com", Gender = Business.Models.ENUM.Gender.MALE, Phone = "1234567890", BirthDate = new DateTime(2000, 1, 1), Age = 24, IsActive = true },
+                _studentFaker.Generate(),
+                _studentFaker.Generate(),
+                });
             await _context.SaveChangesAsync();
 
             // Act

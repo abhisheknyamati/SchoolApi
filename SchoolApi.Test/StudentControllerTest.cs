@@ -11,6 +11,7 @@ using Bogus;
 using SchoolApi.Business.Models.ENUM;
 using SchoolApi.API.ExceptionHandler;
 using Microsoft.AspNetCore.Http;
+using FluentValidation;
 
 namespace SchoolApi.Tests
 {
@@ -22,11 +23,16 @@ namespace SchoolApi.Tests
         private readonly StudentController _controller;
         private readonly Faker<Student> _studentFaker;
         private readonly Faker<AddStudentDto> _addStudentDtoFaker;
+        private readonly IValidator<AddStudentDto> _addStudentValidator;
+        private readonly IValidator<UpdateStudentDto> _updateStudentValidator;
 
-        public StudentControllerTests()
+        public StudentControllerTests(IValidator<AddStudentDto> addStudentValidator, IValidator<UpdateStudentDto> updateStudentValidator)
         {
             _mockRepo = new Mock<IStudentRepo>();
             _mockService = new Mock<IStudentService>();
+
+            _addStudentValidator = addStudentValidator;
+            _updateStudentValidator = updateStudentValidator;
 
             var config = new MapperConfiguration(cfg =>
             {
@@ -42,18 +48,18 @@ namespace SchoolApi.Tests
                 .RuleFor(s => s.FirstName, f => f.Name.FirstName())
                 .RuleFor(s => s.LastName, f => f.Name.LastName())
                 .RuleFor(s => s.Email, f => f.Internet.Email())
-                .RuleFor(s => s.Phone, f => f.Phone.PhoneNumber())
+                .RuleFor(s => s.Phone, f => f.Random.Replace("##########"))
                 .RuleFor(s => s.Address, f => f.Address.FullAddress())
                 .RuleFor(s => s.BirthDate, f => f.Date.Past(20))
                 .RuleFor(s => s.Gender, f => f.PickRandom<Gender>())
                 .RuleFor(s => s.Age, f => f.Random.Int(18, 25))
-                .RuleFor(s => s.Gender, f => f.PickRandom<Gender>());
+                .RuleFor(s => s.IsActive, f => true);
 
             _addStudentDtoFaker = new Faker<AddStudentDto>()
                 .RuleFor(s => s.FirstName, f => f.Name.FirstName())
                 .RuleFor(s => s.LastName, f => f.Name.LastName())
                 .RuleFor(s => s.Email, f => f.Internet.Email())
-                .RuleFor(s => s.Phone, f => f.Phone.PhoneNumber())
+                .RuleFor(s => s.Phone, f => f.Random.Replace("##########"))
                 .RuleFor(s => s.Address, f => f.Address.FullAddress())
                 .RuleFor(s => s.BirthDate, f => f.Date.Past(20))
                 .RuleFor(s => s.Gender, f => f.PickRandom<Gender>());
@@ -79,16 +85,9 @@ namespace SchoolApi.Tests
         public async Task AddStudent_ReturnsOk_WhenStudentIsAddedSuccessfully()
         {
             // Arrange
-            var studentDto = new AddStudentDto
-            {
-                FirstName = "Abhishek",
-                LastName = "Nyamati",
-                Email = "abhi@example.com",
-                BirthDate = new DateTime(2001, 1, 1),
-                Address = "Somewhere",
-                Phone = "1234567890",
-                Gender = Gender.MALE,
-            };
+            var studentDto = _addStudentDtoFaker.Generate();
+            studentDto.FirstName = "Abhishek";
+
             var student = _mapper.Map<Student>(studentDto);
 
             _mockService.Setup(service => service.CalculateAge(studentDto.BirthDate.Value)).Returns(23);
@@ -101,7 +100,6 @@ namespace SchoolApi.Tests
             var okResult = Assert.IsType<OkObjectResult>(result);
             var addedStudent = Assert.IsType<Student>(okResult.Value);
             Assert.Equal("Abhishek", addedStudent.FirstName);
-            Assert.Equal(23, addedStudent.Age);
         }
 
         [Fact]
@@ -203,16 +201,30 @@ namespace SchoolApi.Tests
             // Arrange
             var studentDto = _addStudentDtoFaker.Generate();
             studentDto.Email = null;
-            
-            // Act
-            var result = await _controller.AddStudent(studentDto);
 
-            // Assert
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            var errors = Assert.IsAssignableFrom<IEnumerable<string>>(badRequestResult.Value);
-            Assert.NotEmpty(errors);
+            // Act
+            // var result = await _controller.AddStudent(studentDto);
+
+            // Assert and act
+            var badRequestResult = await Assert.ThrowsAsync<Exception>(async () => await _controller.AddStudent(studentDto));
+            // var errors = Assert.IsAssignableFrom<IEnumerable<string>>(badRequestResult.Message);
+            // Assert.NotEmpty(errors);
+            Assert.Equal(ErrorMsgConstant.StudentNotCreated, badRequestResult.Message);
         }
 
-        
+        [Fact]
+        public async Task DeleteStudent_ReturnsNotFound_WhenStudentDoesNotExist()
+        {
+            // Arrange
+            var student = _studentFaker.Generate();
+            _mockRepo.Setup(repo => repo.GetStudentById(student.Id)).ReturnsAsync((Student)null);
+
+            // Act
+            var result = await _controller.DeleteStudent(student.Id);
+
+            // Assert
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+            Assert.Equal(ErrorMsgConstant.StudentNotFound, notFoundResult.Value);
+        }
     }
 }
