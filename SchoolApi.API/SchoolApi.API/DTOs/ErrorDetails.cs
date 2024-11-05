@@ -15,7 +15,6 @@ namespace SchoolApi.API.DTOs
         public PathString Instance { get; set; }
         public string ExceptionMessage { get; set; }
         
-        // Add this property to hold validation errors
         public IDictionary<string, string[]> Errors { get; set; }
     }
 }

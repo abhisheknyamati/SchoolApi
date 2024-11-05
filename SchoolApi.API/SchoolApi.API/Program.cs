@@ -13,16 +13,14 @@ using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllers(options =>
 {
-    // Customize model state invalid response
     options.ModelBindingMessageProvider.SetValueMustNotBeNullAccessor(_ => "This field is required.");
 }).ConfigureApiBehaviorOptions(options =>
 {
     options.InvalidModelStateResponseFactory = context =>
     {
-        var traceId = Guid.NewGuid(); // Generate a new Trace ID for each error response
+        var traceId = Guid.NewGuid(); 
         var errors = context.ModelState
             .Where(e => e.Value.Errors.Count > 0)
             .ToDictionary(
@@ -37,14 +35,13 @@ builder.Services.AddControllers(options =>
             StatusCode = (int)HttpStatusCode.BadRequest,
             Instance = context.HttpContext.Request.Path,
             ExceptionMessage = "Validation failed.",
-            Errors = errors // Assuming you add a property to ErrorDetails to hold validation errors
+            Errors = errors 
         };
 
         return new BadRequestObjectResult(errorDetails);
     };
 });
 
-// Register your repositories and services
 builder.Services.AddScoped<IStudentRepo, StudentRepo>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 
@@ -92,7 +89,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowAllOrigins");
 
-// Use the global exception handler middleware
 app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
 app.UseHttpsRedirection();
