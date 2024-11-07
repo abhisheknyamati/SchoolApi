@@ -1,0 +1,6 @@
+@SchoolProject.UserModule.Api_HostAddress = http://localhost:5124
+
+GET {{SchoolProject.UserModule.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

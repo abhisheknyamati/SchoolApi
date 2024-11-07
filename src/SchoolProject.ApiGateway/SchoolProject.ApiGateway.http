@@ -1,0 +1,6 @@
+@SchoolProject.ApiGateway_HostAddress = http://localhost:5181
+
+GET {{SchoolProject.ApiGateway_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
