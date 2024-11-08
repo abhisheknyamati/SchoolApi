@@ -30,6 +30,17 @@ namespace SchoolProject.StudentModule.API.ExceptionHandler
                 await httpContext.Response.WriteAsJsonAsync(response);
                 return true;
             }
+
+            if(exception is UnauthorizedAccessException){
+                var response = new 
+                {
+                    StatusCode = StatusCodes.Status401Unauthorized,
+                    ErrorMessage = exception.Message
+                };
+ 
+                await httpContext.Response.WriteAsJsonAsync(response);
+                return true;
+            }
             return false;
         }
     }

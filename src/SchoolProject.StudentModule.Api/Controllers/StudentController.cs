@@ -6,10 +6,14 @@ using SchoolProject.StudentModule.Business.Models;
 using SchoolProject.StudentModule.Business.Pagination;
 using SchoolProject.StudentModule.API.ExceptionHandler;
 using SchoolProject.StudentModule.Api.DTOs;
+using SchoolProject.Api.Filter;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SchoolApi.API.Controllers
 {
+    [Authorize(Roles = "Admin")]
     [Route("api/[controller]")]
+    [ServiceFilter(typeof(ModelValidationFilter))]
     [ApiController]
     public class StudentController : ControllerBase
     {

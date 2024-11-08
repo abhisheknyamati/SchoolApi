@@ -1,10 +1,7 @@
 namespace SchoolProject.StudentModule.API.ExceptionHandler
 {
-    public class StudentNotFound : Exception
+    public class StudentNotFound(string message) : Exception(message) // primary constructor
     {
-        public StudentNotFound(string message) : base(message)
-        {
-        }
     }
 
     public class EmailAlreadyRegistered : Exception

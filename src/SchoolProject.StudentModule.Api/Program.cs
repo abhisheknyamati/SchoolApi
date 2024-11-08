@@ -1,11 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using FluentValidation.AspNetCore;
-using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using FluentValidation;
 using Serilog;
 using SchoolProject.StudentModule.Business.Data;
-using SchoolProject.StudentModule.API.DTOs;
 using SchoolProject.StudentModule.Business.Repositories.Interfaces;
 using SchoolProject.StudentModule.Business.Repositories;
 using SchoolProject.StudentModule.Business.Services;
@@ -13,43 +11,27 @@ using SchoolProject.StudentModule.Business.Services.Interfaces;
 using SchoolProject.StudentModule.Api.Mappers;
 using SchoolProject.StudentModule.Api.Validators;
 using SchoolProject.StudentModule.API.ExceptionHandler;
+using SchoolProject.Api.Filter;
+using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()
     .WriteTo.Console()
-    .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day) 
+    .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day)
     .CreateLogger();
 
-builder.Services.AddControllers(options =>
-{
-    options.ModelBindingMessageProvider.SetValueMustNotBeNullAccessor(_ => "This field is required.");
-}).ConfigureApiBehaviorOptions(options =>
-{
-    options.InvalidModelStateResponseFactory = context =>
-    {
-        var traceId = Guid.NewGuid(); 
-        var errors = context.ModelState
-            .Where(e => e.Value.Errors.Count > 0)
-            .ToDictionary(
-                kvp => kvp.Key,
-                kvp => kvp.Value.Errors.Select(err => err.ErrorMessage).ToArray()
-            );
+// builder.Services.AddControllers().AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<StudentValidator>());
+builder.Services.AddControllers();
 
-        var errorDetails = new ErrorDetails
-        {
-            TraceId = traceId,
-            Message = "One or more validation errors occurred.",
-            StatusCode = (int)HttpStatusCode.BadRequest,
-            Instance = context.HttpContext.Request.Path,
-            ExceptionMessage = "Validation failed.",
-            Errors = errors 
-        };
-
-        return new BadRequestObjectResult(errorDetails);
-    };
-});
+builder.Services.AddFluentValidationAutoValidation(fv => fv.DisableDataAnnotationsValidation = true);
+builder.Services.AddScoped<ModelValidationFilter>();
+builder.Services.AddControllers(options => options.Filters.Add<ModelValidationFilter>());
+builder.Services.Configure<ApiBehaviorOptions>(options => options.SuppressModelStateInvalidFilter = true);
 
 builder.Services.AddScoped<IStudentRepo, StudentRepo>();
 builder.Services.AddScoped<IStudentService, StudentService>();
@@ -74,8 +56,74 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddSwaggerGen(opt =>
+{
+    opt.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "MyAPI", Version = "v1" });
+    opt.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Description = "Please enter token",
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        BearerFormat = "JWT",
+        Scheme = "bearer"
+    });
+
+    opt.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type=ReferenceType.SecurityScheme,
+                    Id="Bearer"
+                }
+            },
+            new string[]{}
+        }
+    });
+});
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.RequireHttpsMetadata = false;
+        options.SaveToken = true;
+
+        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters()
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
+            ValidateIssuerSigningKey = true
+        };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = context =>
+            {
+                var claims = context.Principal.Claims;
+                foreach (var claim in claims)
+                {
+                    Console.WriteLine($"{claim.Type}: {claim.Value}");
+                }
+                return Task.CompletedTask;
+            },
+            OnAuthenticationFailed = context =>
+            {
+                Console.WriteLine($"Authentication failed: {context.Exception.Message}");
+                return Task.CompletedTask;
+            }
+        };
+
+    });
+
+
 var serverVersion = ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("Localhost"));
-builder.Services.AddDbContext<StudentModuleDbContext>(options => 
+builder.Services.AddDbContext<StudentModuleDbContext>(options =>
 {
     options.UseMySql(builder.Configuration.GetConnectionString("Localhost"), serverVersion)
            .EnableDetailedErrors()
@@ -92,9 +140,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowAllOrigins");
 
-app.UseExceptionHandler(_=>{ });
+app.UseExceptionHandler(_ => { });
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

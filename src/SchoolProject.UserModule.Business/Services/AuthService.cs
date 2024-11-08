@@ -39,7 +39,7 @@ namespace SchoolProject.UserModule.Business.Services
             {
                 new Claim("Name", user.Name ?? throw new ArgumentNullException(nameof(user.Name))),
                 new Claim("Email", user.Email ?? throw new ArgumentNullException(nameof(user.Name))),
-                new Claim("Role", user.IsAdmin ? "Admin" : "Teacher"),
+                new Claim(ClaimTypes.Role, user.IsAdmin ? "Admin" : "Teacher"),
                 new Claim("Status", user.IsActive ? "Active" : "Inactive")
             });
         }
