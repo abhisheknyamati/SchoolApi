@@ -27,20 +27,13 @@ namespace SchoolApi.API.Controllers
             _mapper = mapper;
             _service = service;
         }
-
-        [HttpGet("getStudents")]
-        public async Task<IActionResult> GetAllStudents()
-        {
-            var students = await _repo.GetAllStudents();
-            if (students == null || !students.Any())
-            {
-                return NotFound(ErrorMsgConstant.StudentListEmpty);
-            }
-
-            return Ok(students);
-        }
-
-        [HttpPost("addStudent")]
+/// <summary>
+/// Add a new student
+/// </summary>
+/// <returns></returns>
+/// <response code="200">Returns the newly created student</response>
+/// <exception cref="Exception"></exception>
+        [HttpPost]
         public async Task<IActionResult> AddStudent([FromBody] AddStudentDto studentDto)
         {
             var student = _mapper.Map<Student>(studentDto);
@@ -58,7 +51,7 @@ namespace SchoolApi.API.Controllers
             return Ok(student);
         }
 
-        [HttpDelete("softDelete")]
+        [HttpDelete]
         public async Task<ActionResult> DeleteStudent(int studentId)
         {
             var requiredStudent = await _repo.GetStudentById(studentId);
@@ -75,13 +68,13 @@ namespace SchoolApi.API.Controllers
             return Ok(requiredStudent);
         }
 
-        [HttpPut("updateDetails")]
+        [HttpPut]
         public async Task<IActionResult> UpdateDetails(int id, [FromBody] UpdateStudentDto studentDto)
         {
             var existingStudent = await _repo.GetStudentById(id);
-            if (existingStudent == null)
+            if (existingStudent == new Student())
             {
-                throw new KeyNotFoundException(ErrorMsgConstant.StudentNotFound);
+                return NotFound(ErrorMsgConstant.StudentNotFound);
             }
 
             if (!string.IsNullOrEmpty(studentDto.FirstName))
@@ -113,6 +106,7 @@ namespace SchoolApi.API.Controllers
 
 
         [HttpGet]
+        [Authorize(Roles = "Admin,Teacher")]
         public async Task<ActionResult<PagedResponse<Student>>> GetPagedStudents([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 5, [FromQuery] string searchTerm = "")
         {
             if (pageNumber < 1)
@@ -129,22 +123,36 @@ namespace SchoolApi.API.Controllers
 
             if (result.Data.Count == 0)
             {
-                throw new KeyNotFoundException(ErrorMsgConstant.StudentListEmpty);
+                return NotFound(ErrorMsgConstant.StudentListEmpty);
             }
 
             return Ok(result);
         }
 
-        [HttpGet("getStudentById")]
+        [HttpGet("{id}")]
+        [Authorize(Roles = "Admin,Teacher")]
         public async Task<IActionResult> GetStudentById(int id)
         {
             var student = await _repo.GetStudentById(id);
-            if (student == null)
+            if (student == new Student())
             {
-                throw new StudentNotFound(ErrorMsgConstant.StudentNotFound);
+                return NotFound(ErrorMsgConstant.StudentNotFound);
             }
 
             return Ok(student);
+        }
+
+        [HttpGet("getStudents")]
+        [Authorize(Roles = "Admin,Teacher")]
+        public async Task<IActionResult> GetAllStudents()
+        {
+            var students = await _repo.GetAllStudents();
+            if (students == null || !students.Any())
+            {
+                return NotFound(ErrorMsgConstant.StudentListEmpty);
+            }
+
+            return Ok(students);
         }
     }
 }

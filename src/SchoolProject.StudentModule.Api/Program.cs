@@ -16,6 +16,7 @@ using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,7 +59,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddSwaggerGen(opt =>
 {
-    opt.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "MyAPI", Version = "v1" });
+    opt.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "StudentModule API", Version = "v1" });
     opt.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
@@ -83,6 +84,7 @@ builder.Services.AddSwaggerGen(opt =>
             new string[]{}
         }
     });
+    opt.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
 });
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

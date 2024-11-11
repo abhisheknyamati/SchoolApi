@@ -11,7 +11,7 @@ namespace SchoolProject.UserModule.Business.Repositories
 
         public async Task<IEnumerable<User>> GetAllUsers()
         {
-            return await _context.Users.Where(i => i.IsAdmin).ToListAsync();
+            return await _context.Users.ToListAsync();
         }
 
         public async Task<bool> DeleteUser(User user)

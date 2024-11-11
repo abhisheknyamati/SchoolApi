@@ -46,7 +46,7 @@ namespace SchoolProject.StudentModule.Business.Repositories
 
         public async Task<PagedResponse<Student>> GetStudents(int pageNumber, int pageSize, string searchTerm)
         {
-            var query = _context.Students.AsQueryable();
+            var query = _context.Students.AsQueryable().Where(i => i.IsActive);
 
             if (searchTerm != null)
             {
@@ -64,8 +64,8 @@ namespace SchoolProject.StudentModule.Business.Repositories
 
         public async Task<Student> GetStudentById(int id)
         {
-            var student = await _context.Students.FirstOrDefaultAsync(u => u.Id == id);
-            return student ?? throw new Exception("Student not found");
+            var student = await _context.Students.FirstOrDefaultAsync(u => u.Id == id && u.IsActive);
+            return student;
         }
     }
 }

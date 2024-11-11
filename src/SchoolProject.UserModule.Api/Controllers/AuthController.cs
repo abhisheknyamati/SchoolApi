@@ -21,7 +21,7 @@ namespace SchoolProject.UserModule.Api.Controllers
             try
             {
                 var token = await _authService.Login(request.Username, request.Password);
-                return Ok(new { token });
+                return Ok(token);
             }
             catch (UnauthorizedAccessException ex)
             {

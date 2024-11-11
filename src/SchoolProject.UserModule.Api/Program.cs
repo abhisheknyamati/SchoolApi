@@ -11,7 +11,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options => 
+{
+    options.SwaggerDoc("v1", new() { Title = "UserModule API", Version = "v1" });
+});
 
 builder.Services.AddScoped<IUserRepo, UserRepo>();
 builder.Services.AddScoped<IAuthRepo, AuthRepo>();
