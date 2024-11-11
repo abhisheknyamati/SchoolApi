@@ -11,12 +11,13 @@ using SchoolProject.StudentModule.Business.Services.Interfaces;
 using SchoolProject.StudentModule.Api.Mappers;
 using SchoolProject.StudentModule.Api.Validators;
 using SchoolProject.StudentModule.API.ExceptionHandler;
-using SchoolProject.Api.Filter;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Reflection;
+using SchoolProject.StudentModule.Api.Filter;
+using SchoolAPI.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,7 +32,12 @@ builder.Services.AddControllers();
 
 builder.Services.AddFluentValidationAutoValidation(fv => fv.DisableDataAnnotationsValidation = true);
 builder.Services.AddScoped<ModelValidationFilter>();
-builder.Services.AddControllers(options => options.Filters.Add<ModelValidationFilter>());
+builder.Services.AddScoped<APILoggingFilter>();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<APILoggingFilter>();
+    options.Filters.Add<ModelValidationFilter>();
+});
 builder.Services.Configure<ApiBehaviorOptions>(options => options.SuppressModelStateInvalidFilter = true);
 
 builder.Services.AddScoped<IStudentRepo, StudentRepo>();

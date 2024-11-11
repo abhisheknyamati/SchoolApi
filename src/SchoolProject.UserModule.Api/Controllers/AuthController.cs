@@ -1,11 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using SchoolProject.UserModule.Api.DTOs;
+using SchoolProject.UserModule.Api.ExceptionHandler;
+using SchoolProject.UserModule.Api.Filter;
 using SchoolProject.UserModule.Business.Services.Interfaces;
 
 namespace SchoolProject.UserModule.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [ServiceFilter(typeof(ModelValidationFilter))]
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
@@ -18,15 +21,12 @@ namespace SchoolProject.UserModule.Api.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            try
+            var token = await _authService.Login(request.Username, request.Password);
+            if (token == null)
             {
-                var token = await _authService.Login(request.Username, request.Password);
-                return Ok(token);
+                throw new UnauthorizedAccessException(ErrorMsgConstant.InvalidToken);
             }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(ex.Message);
-            }
+            return Ok(token);
         }
     }
 }

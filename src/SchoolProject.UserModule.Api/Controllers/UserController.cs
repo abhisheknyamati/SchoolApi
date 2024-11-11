@@ -1,6 +1,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using SchoolProject.UserModule.Api.DTOs;
+using SchoolProject.UserModule.Api.Filter;
 using SchoolProject.UserModule.Business.Models;
 using SchoolProject.UserModule.Business.Repositories.Interfaces;
 
@@ -8,6 +9,7 @@ namespace SchoolProject.UserModule.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [ServiceFilter(typeof(ModelValidationFilter))]
     public class UserController : ControllerBase
     {
         private readonly IUserRepo _userRepo;

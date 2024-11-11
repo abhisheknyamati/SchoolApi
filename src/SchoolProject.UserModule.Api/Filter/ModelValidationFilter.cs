@@ -1,12 +1,12 @@
 
 using System.Net;
-using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using SchoolProject.StudentModule.Api.DTOs;
+
+using SchoolProject.UserModule.Api.DTOs;
 
 
-namespace SchoolProject.StudentModule.Api.Filter
+namespace SchoolProject.UserModule.Api.Filter
 {
     public class ModelValidationFilter : IActionFilter
     {

@@ -6,15 +6,17 @@ using SchoolProject.StudentModule.Business.Models;
 using SchoolProject.StudentModule.Business.Pagination;
 using SchoolProject.StudentModule.API.ExceptionHandler;
 using SchoolProject.StudentModule.Api.DTOs;
-using SchoolProject.Api.Filter;
 using Microsoft.AspNetCore.Authorization;
 using System.Net.Mime;
+using SchoolProject.StudentModule.Api.Filter;
+using SchoolAPI.Filters;
 
 namespace SchoolApi.API.Controllers
 {
     // [Authorize(Roles = "Admin")]
     [Route("api/[controller]")]
     [ServiceFilter(typeof(ModelValidationFilter))]
+    [ServiceFilter(typeof(APILoggingFilter))]
     [ApiController]
     public class StudentController : ControllerBase
     {
@@ -65,7 +67,7 @@ namespace SchoolApi.API.Controllers
         /// <response code="404">Student not found</response>
         /// <response code="500">Student already deleted or other error</response>
         /// <returns>The details of the deleted student.</returns>
-        [HttpDelete("{studentId}")]
+        [HttpDelete("{StudentId}")]
         [ProducesResponseType(typeof(Student), 200)]
         public async Task<ActionResult> DeleteStudent(int studentId)
         {
@@ -156,11 +158,6 @@ namespace SchoolApi.API.Controllers
             }
 
             PagedResponse<Student> result = await _repo.GetStudents(pageNumber, pageSize, searchTerm);
-
-            // if (result.Data.Count == 0)
-            // {
-            //     return NotFound(ErrorMsgConstant.StudentListEmpty);
-            // }
 
             return Ok(result);
         }
