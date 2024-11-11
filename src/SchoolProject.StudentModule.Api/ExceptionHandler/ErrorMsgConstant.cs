@@ -18,5 +18,6 @@ namespace SchoolProject.StudentModule.API.ExceptionHandler
         public const string PaginationPageSize = "Page size must be greater than 0 and less than or equal to 100.";
         public const string PaginationPageNumer = "Page number must be greater than 0.";
         public const string StudentAlreadyDeleted = "Couldn't delete student as it's is already deleted.";
+        public const string EmailAlreadyExists = "Email already exists";
     }
 }

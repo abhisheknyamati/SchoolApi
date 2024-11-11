@@ -62,10 +62,15 @@ namespace SchoolProject.StudentModule.Business.Repositories
             return pagedResponse;
         }
 
-        public async Task<Student> GetStudentById(int id)
+        public async Task<Student?> GetStudentById(int id)
         {
-            var student = await _context.Students.FirstOrDefaultAsync(u => u.Id == id && u.IsActive);
+            Student? student = await _context.Students.FirstOrDefaultAsync(u => u.Id == id && u.IsActive);
             return student;
+        }
+
+        public bool IsDuplicateEmail(string email)
+        {
+            return _context.Students.Any(i => i.Email == email);
         }
     }
 }
