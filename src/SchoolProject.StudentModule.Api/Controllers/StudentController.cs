@@ -13,7 +13,6 @@ using SchoolAPI.Filters;
 
 namespace SchoolApi.API.Controllers
 {
-    // [Authorize(Roles = "Admin")]
     [Route("api/[controller]")]
     [ServiceFilter(typeof(ModelValidationFilter))]
     [ServiceFilter(typeof(APILoggingFilter))]
@@ -40,13 +39,14 @@ namespace SchoolApi.API.Controllers
         /// <response code="500">Student not created due to server error</response>
         /// <returns>The details of the newly created student.</returns>
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         [ProducesResponseType(typeof(GetStudentDto), 200)]
         public async Task<IActionResult> AddStudent([FromBody] AddStudentDto studentDto)
         {
             var student = _mapper.Map<Student>(studentDto);
             student.Age = _service.CalculateAge(studentDto.BirthDate.Value);
 
-            if(_repo.IsDuplicateEmail(student.Email))
+            if (_repo.IsDuplicateEmail(student.Email))
             {
                 throw new EmailAlreadyRegistered(ErrorMsgConstant.EmailAlreadyExists);
             }
@@ -68,6 +68,7 @@ namespace SchoolApi.API.Controllers
         /// <response code="500">Student already deleted or other error</response>
         /// <returns>The details of the deleted student.</returns>
         [HttpDelete("{StudentId}")]
+        [Authorize(Roles = "Admin")]
         [ProducesResponseType(typeof(Student), 200)]
         public async Task<ActionResult> DeleteStudent(int studentId)
         {
@@ -96,6 +97,7 @@ namespace SchoolApi.API.Controllers
         /// <response code="500">Student not updated due to server error</response>
         /// <returns>The updated details of the student.</returns>
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         [ProducesResponseType(typeof(Student), 200)]
         public async Task<IActionResult> UpdateDetails(int id, [FromBody] UpdateStudentDto studentDto)
         {
@@ -123,7 +125,7 @@ namespace SchoolApi.API.Controllers
                 existingStudent.Age = _service.CalculateAge(studentDto.BirthDate.Value);
             }
 
-            if(_repo.IsDuplicateEmail(studentDto.Email))
+            if (_repo.IsDuplicateEmail(studentDto.Email))
             {
                 throw new EmailAlreadyRegistered(ErrorMsgConstant.EmailAlreadyExists);
             }
@@ -144,6 +146,7 @@ namespace SchoolApi.API.Controllers
         /// <response code="500">Error in pagination</response>
         /// <returns>A paginated list of students.</returns>
         [HttpGet]
+        [Authorize(Roles = "Admin, Teacher")]
         [ProducesResponseType(typeof(PagedResponse<Student>), 200)]
         public async Task<ActionResult<PagedResponse<Student>>> GetPagedStudents([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 5, [FromQuery] string searchTerm = "")
         {
@@ -170,6 +173,7 @@ namespace SchoolApi.API.Controllers
         /// <response code="404">Student not found</response>
         /// <returns>The details of the student with the specified ID.</returns>
         [HttpGet("{id}")]
+        [Authorize(Roles = "Admin, Teacher")]
         [ProducesResponseType(typeof(Student), 200)]
         public async Task<IActionResult> GetStudentById(int id)
         {
@@ -190,6 +194,7 @@ namespace SchoolApi.API.Controllers
         /// <response code="500">Error in pagination</response>
         /// <returns>A list of all students.</returns>
         [HttpGet("getStudents")]
+        [Authorize(Roles = "Admin, Teacher")]
         [ProducesResponseType(typeof(IEnumerable<Student>), 200)]
         public async Task<IActionResult> GetAllStudents()
         {
@@ -198,8 +203,8 @@ namespace SchoolApi.API.Controllers
             {
                 return NotFound(ErrorMsgConstant.StudentListEmpty);
             }
-            var response = _mapper.Map<IEnumerable<GetStudentDto>>(students);
-            return Ok(response);
+            
+            return Ok(students);
         }
     }
 }

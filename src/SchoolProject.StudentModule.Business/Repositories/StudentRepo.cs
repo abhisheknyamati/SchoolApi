@@ -64,7 +64,7 @@ namespace SchoolProject.StudentModule.Business.Repositories
 
         public async Task<Student?> GetStudentById(int id)
         {
-            Student? student = await _context.Students.FirstOrDefaultAsync(u => u.Id == id && u.IsActive);
+            Student? student = await _context.Students.FirstOrDefaultAsync(u => u.Id == id);
             return student;
         }
 

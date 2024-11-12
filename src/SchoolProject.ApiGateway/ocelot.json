@@ -23,7 +23,7 @@
                 }
             ],
             "UpstreamPathTemplate": "/student",
-            "UpstreamHttpMethod": [ "GET" , "POST" , "PUT" , "DELETE"],
+            "UpstreamHttpMethod": [ "GET" , "POST" , "PUT" ],
             "SwaggerKey": "studentService"
         },
         {
@@ -36,7 +36,7 @@
                 }
             ],
             "UpstreamPathTemplate": "/student/{id}",
-            "UpstreamHttpMethod": [ "GET" ],
+            "UpstreamHttpMethod": [ "GET", "DELETE" ],
             "SwaggerKey": "studentService"
         },
         {

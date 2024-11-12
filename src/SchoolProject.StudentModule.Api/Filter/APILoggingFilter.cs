@@ -3,22 +3,22 @@ using Serilog;
 using Microsoft.AspNetCore.Mvc;
 using SchoolProject.StudentModule.Api.DTOs;
 
-namespace SchoolAPI.Filters
+namespace SchoolProject.StudentModule.Api.Filter
 {
     public class APILoggingFilter : IActionFilter
     {
         private readonly Serilog.ILogger _logger;
- 
+
         public APILoggingFilter()
         {
             _logger = Log.ForContext<APILoggingFilter>();
         }
- 
+
         public void OnActionExecuting(ActionExecutingContext context)
         {
-           
+
         }
- 
+
         public void OnActionExecuted(ActionExecutedContext context)
         {
             var logEntry = new ApiLog
@@ -28,18 +28,29 @@ namespace SchoolAPI.Filters
                 StatusCode = context.HttpContext.Response.StatusCode,
                 Timestamp = DateTime.Now
             };
- 
+
             _logger.Information("{@ApiLogEntry}", logEntry);
- 
+
             if (context.Result is ObjectResult objectResult && objectResult.Value != null)
             {
                 var returnedObject = objectResult.Value;
-               
+
                 _logger.Information(
                     "Returned Object: {@ReturnedObject}",
                     returnedObject
                 );
             }
+
+            if (context.Exception is Exception exception && exception.Message != null)
+            {
+                var returnedObject = exception.Message;
+
+                _logger.Information(
+                    "Returned Object: {@ReturnedObject}",
+                    returnedObject
+                );
+            }
+
         }
     }
 }

@@ -14,7 +14,7 @@ namespace SchoolProject.StudentModule.API.ExceptionHandler
                     StatusCode = StatusCodes.Status409Conflict,
                     ErrorMessage = exception.Message
                 };
- 
+                httpContext.Response.StatusCode = StatusCodes.Status409Conflict;
                 await httpContext.Response.WriteAsJsonAsync(response);
                 return true;
             }
@@ -25,7 +25,7 @@ namespace SchoolProject.StudentModule.API.ExceptionHandler
                     StatusCode = StatusCodes.Status401Unauthorized,
                     ErrorMessage = exception.Message
                 };
- 
+                httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
                 await httpContext.Response.WriteAsJsonAsync(response);
                 return true;
             }
@@ -36,7 +36,7 @@ namespace SchoolProject.StudentModule.API.ExceptionHandler
                     StatusCode = StatusCodes.Status409Conflict,
                     ErrorMessage = exception.Message
                 };
- 
+                httpContext.Response.StatusCode = StatusCodes.Status409Conflict;
                 await httpContext.Response.WriteAsJsonAsync(response);
                 return true;
             }
@@ -47,7 +47,7 @@ namespace SchoolProject.StudentModule.API.ExceptionHandler
                     StatusCode = StatusCodes.Status400BadRequest,
                     ErrorMessage = exception.Message
                 };
- 
+                httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
                 await httpContext.Response.WriteAsJsonAsync(response);
                 return true;
             }
@@ -58,7 +58,7 @@ namespace SchoolProject.StudentModule.API.ExceptionHandler
                     StatusCode = StatusCodes.Status400BadRequest,
                     ErrorMessage = exception.Message
                 };
- 
+                httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
                 await httpContext.Response.WriteAsJsonAsync(response);
                 return true;
             }   
@@ -69,7 +69,7 @@ namespace SchoolProject.StudentModule.API.ExceptionHandler
                     StatusCode = StatusCodes.Status409Conflict,
                     ErrorMessage = exception.Message
                 };
- 
+                httpContext.Response.StatusCode = StatusCodes.Status409Conflict;
                 await httpContext.Response.WriteAsJsonAsync(response);
                 return true;
             }

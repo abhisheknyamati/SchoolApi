@@ -35,7 +35,6 @@ builder.Services.AddScoped<ModelValidationFilter>();
 builder.Services.AddScoped<APILoggingFilter>();
 builder.Services.AddControllers(options =>
 {
-    options.Filters.Add<APILoggingFilter>();
     options.Filters.Add<ModelValidationFilter>();
 });
 builder.Services.Configure<ApiBehaviorOptions>(options => options.SuppressModelStateInvalidFilter = true);
