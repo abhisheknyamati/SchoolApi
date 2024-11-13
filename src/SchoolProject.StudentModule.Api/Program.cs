@@ -17,22 +17,20 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Reflection;
 using SchoolProject.StudentModule.Api.Filter;
-using SchoolAPI.Filters;
+using Serilog.Exceptions;
+using Serilog.Formatting.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
-Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Debug()
-    .WriteTo.Console()
-    .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day)
-    .CreateLogger();
+// Log.Logger = new LoggerConfiguration()
+//     .MinimumLevel.Debug()
+//     .Enrich.FromLogContext()
+//     .Enrich.WithExceptionDetails()
+//     // .WriteTo.Console(new JsonFormatter())
+//     .WriteTo.File(new JsonFormatter(), "logs/log-.json", rollingInterval: RollingInterval.Day)
+//     .CreateLogger();
+// builder.Host.UseSerilog();
 
-// builder.Services.AddControllers().AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<StudentValidator>());
-builder.Services.AddControllers();
-
-builder.Services.AddFluentValidationAutoValidation(fv => fv.DisableDataAnnotationsValidation = true);
-builder.Services.AddScoped<ModelValidationFilter>();
-builder.Services.AddScoped<APILoggingFilter>();
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<ModelValidationFilter>();
@@ -48,7 +46,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(typeof(StudentProfile).Assembly);
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
-builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddFluentValidationAutoValidation(fv => fv.DisableDataAnnotationsValidation = true);
 builder.Services.AddValidatorsFromAssemblyContaining<StudentValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<StudentUpdateValidator>();
 
@@ -105,26 +103,27 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = builder.Configuration["Jwt:Audience"],
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
-            ValidateIssuerSigningKey = true
+            ValidateIssuerSigningKey = true,
+            RoleClaimType = "Role"
         };
 
-        options.Events = new JwtBearerEvents
-        {
-            OnTokenValidated = context =>
-            {
-                var claims = context.Principal.Claims;
-                foreach (var claim in claims)
-                {
-                    Console.WriteLine($"{claim.Type}: {claim.Value}");
-                }
-                return Task.CompletedTask;
-            },
-            OnAuthenticationFailed = context =>
-            {
-                Console.WriteLine($"Authentication failed: {context.Exception.Message}");
-                return Task.CompletedTask;
-            }
-        };
+        // options.Events = new JwtBearerEvents
+        // {
+        //     OnTokenValidated = context =>
+        //     {
+        //         var claims = context.Principal.Claims;
+        //         foreach (var claim in claims)
+        //         {
+        //             Console.WriteLine($"{claim.Type}: {claim.Value}");
+        //         }
+        //         return Task.CompletedTask;
+        //     },
+        //     OnAuthenticationFailed = context =>
+        //     {
+        //         Console.WriteLine($"Authentication failed: {context.Exception.Message}");
+        //         return Task.CompletedTask;
+        //     }
+        // };
 
     });
 
@@ -144,6 +143,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// app.UseSerilogRequestLogging();
 
 app.UseCors("AllowAllOrigins");
 

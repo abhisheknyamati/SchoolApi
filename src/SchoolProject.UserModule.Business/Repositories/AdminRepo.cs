@@ -13,12 +13,12 @@ namespace SchoolProject.UserModule.Business.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<User>> GetAllAdmins()
+        public async Task<IEnumerable<User?>> GetAllUsers()
         {
             return await _context.Users.Where(i => i.IsAdmin).ToListAsync();
         }
 
-        public async Task<bool> DeleteAdmin(User user)
+        public async Task<bool> DeleteUser(User user)
         {
             if (user.IsActive)
             {
@@ -35,18 +35,22 @@ namespace SchoolProject.UserModule.Business.Repositories
             await _context.SaveChangesAsync();
             return user;
         }
-        public async Task<User> GetAdminById(int id)
+        public async Task<User?> GetUserById(int id)
         {
             return await _context.Users.FirstOrDefaultAsync(i => i.Id == id);
         }
 
-        public async Task<User> AddAdmin(User user)
+        public async Task<User> AddUser(User user)
         {
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
             return user;
         }
-
+        
+        public async Task<User?> GetUserByEmail(string email)
+        {
+            return await _context.Users.FirstOrDefaultAsync(i => i.Email == email);
+        }
         
     }
 }

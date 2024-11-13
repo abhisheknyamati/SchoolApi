@@ -1,5 +1,3 @@
-
-using System.Net;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -25,7 +23,7 @@ namespace SchoolProject.StudentModule.Api.Filter
                 new ValidationError
                 {
                     Message = "One or more validation errors occurred.",
-                    StatusCode = (int)HttpStatusCode.BadRequest,
+                    StatusCode = StatusCodes.Status400BadRequest,
                     ExceptionMessage = "Validation failed.",
                     Errors = errors
                 });

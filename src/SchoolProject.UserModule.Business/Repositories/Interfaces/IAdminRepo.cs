@@ -4,10 +4,11 @@ namespace SchoolProject.UserModule.Business.Repositories.Interfaces
 {
     public interface IAdminRepo
     {
-        Task<IEnumerable<User>> GetAllAdmins();
-        Task<bool> DeleteAdmin(User user);
+        Task<IEnumerable<User?>> GetAllUsers();
+        Task<bool> DeleteUser(User user);
         Task<User> UpdateDetails(User user);
-        Task<User> GetAdminById(int id);
-        Task<User> AddAdmin(User user);
+        Task<User?> GetUserById(int id);
+        Task<User> AddUser(User user);
+        Task<User?> GetUserByEmail(string email);
     }
 }

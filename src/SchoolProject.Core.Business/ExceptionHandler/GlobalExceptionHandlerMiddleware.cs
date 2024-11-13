@@ -1,8 +1,9 @@
 
 using Microsoft.AspNetCore.Diagnostics;
-using SchoolProject.StudentModule.API.Constants;
+using Microsoft.AspNetCore.Http;
+using SchoolProject.Core.Business.Constants;
 
-namespace SchoolProject.StudentModule.API.ExceptionHandler
+namespace SchoolProject.Core.Business.ExceptionHandler
 {
     public class GlobalExceptionHandler : IExceptionHandler
     { 

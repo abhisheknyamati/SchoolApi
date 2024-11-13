@@ -29,7 +29,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddScoped<IUserRepo, UserRepo>();
-builder.Services.AddScoped<IAuthRepo, AuthRepo>();
+builder.Services.AddScoped<IAdminRepo, AdminRepo>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddAutoMapper(typeof(UserProfile).Assembly);

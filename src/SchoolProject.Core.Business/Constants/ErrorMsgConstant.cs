@@ -1,4 +1,4 @@
-namespace SchoolProject.StudentModule.API.ExceptionHandler
+namespace SchoolProject.Core.Business.Constants
 {
     public class ErrorMsgConstant
     {
@@ -19,5 +19,6 @@ namespace SchoolProject.StudentModule.API.ExceptionHandler
         public const string PaginationPageNumer = "Page number must be greater than 0.";
         public const string StudentAlreadyDeleted = "Couldn't delete student as it's is already deleted.";
         public const string EmailAlreadyExists = "Email already exists";
+        public const string InternalError = "Custom internal server error ";
     }
 }

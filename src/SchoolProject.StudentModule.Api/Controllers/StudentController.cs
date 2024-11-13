@@ -7,15 +7,13 @@ using SchoolProject.StudentModule.Business.Pagination;
 using SchoolProject.StudentModule.API.ExceptionHandler;
 using SchoolProject.StudentModule.Api.DTOs;
 using Microsoft.AspNetCore.Authorization;
-using System.Net.Mime;
 using SchoolProject.StudentModule.Api.Filter;
-using SchoolAPI.Filters;
+using SchoolProject.StudentModule.Api.Constants;
+using SchoolProject.StudentModule.API.Constants;
 
-namespace SchoolApi.API.Controllers
+namespace SchoolProject.StudentModule.API.Controllers
 {
     [Route("api/[controller]")]
-    [ServiceFilter(typeof(ModelValidationFilter))]
-    [ServiceFilter(typeof(APILoggingFilter))]
     [ApiController]
     public class StudentController : ControllerBase
     {
@@ -36,15 +34,21 @@ namespace SchoolApi.API.Controllers
         /// <remarks>Creates a new student record based on the provided information.</remarks>
         /// <param name="studentDto">The details of the student to add.</param>
         /// <response code="200">Returns the newly created student</response>
+        /// <response code="400">Validation error</response>
+        /// <response code="401">Unauthorized access</response>
+        /// <response code="409">Email already exists</response>
         /// <response code="500">Student not created due to server error</response>
         /// <returns>The details of the newly created student.</returns>
         [HttpPost]
-        [Authorize(Roles = "Admin")]
         [ProducesResponseType(typeof(GetStudentDto), 200)]
-        public async Task<IActionResult> AddStudent([FromBody] AddStudentDto studentDto)
+        [Authorize(Roles = RoleConstants.Admin)]
+        public async Task<IActionResult> AddStudent(AddStudentDto studentDto)
         {
             var student = _mapper.Map<Student>(studentDto);
-            student.Age = _service.CalculateAge(studentDto.BirthDate.Value);
+            if (studentDto.BirthDate.HasValue)
+            {
+                student.Age = _service.CalculateAge(studentDto.BirthDate.Value);
+            }
 
             if (_repo.IsDuplicateEmail(student.Email))
             {
@@ -64,12 +68,13 @@ namespace SchoolApi.API.Controllers
         /// </summary>
         /// <param name="studentId">The ID of the student to delete.</param>
         /// <response code="200">Returns the details of the deleted student</response>
+        /// <response code="401">Unauthorized access</response>
         /// <response code="404">Student not found</response>
         /// <response code="500">Student already deleted or other error</response>
         /// <returns>The details of the deleted student.</returns>
         [HttpDelete("{StudentId}")]
-        [Authorize(Roles = "Admin")]
         [ProducesResponseType(typeof(Student), 200)]
+        [Authorize(Roles = RoleConstants.Admin)]
         public async Task<ActionResult> DeleteStudent(int studentId)
         {
             var requiredStudent = await _repo.GetStudentById(studentId);
@@ -92,14 +97,16 @@ namespace SchoolApi.API.Controllers
         /// <param name="id">The ID of the student to update.</param>
         /// <param name="studentDto">The updated details of the student.</param>
         /// <response code="200">Returns the updated student details</response>
+        /// <response code="400">Validation error</response>
+        /// <response code="401">Unauthorized access</response>
         /// <response code="404">Student not found</response>
-        /// <response code="422">Validation error</response>
+        /// <response code="409">Email already exists</response>
         /// <response code="500">Student not updated due to server error</response>
         /// <returns>The updated details of the student.</returns>
         [HttpPut("{id}")]
-        [Authorize(Roles = "Admin")]
         [ProducesResponseType(typeof(Student), 200)]
-        public async Task<IActionResult> UpdateDetails(int id, [FromBody] UpdateStudentDto studentDto)
+        [Authorize(Roles = RoleConstants.Admin)]
+        public async Task<IActionResult> UpdateDetails(int id, UpdateStudentDto studentDto)
         {
             var existingStudent = await _repo.GetStudentById(id);
             if (existingStudent == new Student())
@@ -142,22 +149,23 @@ namespace SchoolApi.API.Controllers
         /// <param name="pageSize">The number of students per page.</param>
         /// <param name="searchTerm">Optional search term for filtering students by name.</param>
         /// <response code="200">Returns the list of students</response>
+        /// <response code="401">Unauthorized access</response>
         /// <response code="404">Student list is empty</response>
         /// <response code="500">Error in pagination</response>
         /// <returns>A paginated list of students.</returns>
         [HttpGet]
-        [Authorize(Roles = "Admin, Teacher")]
+        [Authorize(Roles = $"{RoleConstants.Admin}, {RoleConstants.Teacher}")]
         [ProducesResponseType(typeof(PagedResponse<Student>), 200)]
         public async Task<ActionResult<PagedResponse<Student>>> GetPagedStudents([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 5, [FromQuery] string searchTerm = "")
         {
             if (pageNumber < 1)
             {
-                throw new PageNumberException(ErrorMsgConstant.PaginationPageNumer);
+                return BadRequest(ErrorMsgConstant.PaginationPageNumer);
             }
 
             if (pageSize <= 0 || pageSize > 100)
             {
-                throw new PageSizeException(ErrorMsgConstant.PaginationPageSize);
+                return BadRequest(ErrorMsgConstant.PaginationPageSize);
             }
 
             PagedResponse<Student> result = await _repo.GetStudents(pageNumber, pageSize, searchTerm);
@@ -170,11 +178,12 @@ namespace SchoolApi.API.Controllers
         /// </summary>
         /// <param name="id">The ID of the student to retrieve.</param>
         /// <response code="200">Returns the student details</response>
+        /// <response code="401">Unauthorized access</response>
         /// <response code="404">Student not found</response>
         /// <returns>The details of the student with the specified ID.</returns>
         [HttpGet("{id}")]
-        [Authorize(Roles = "Admin, Teacher")]
         [ProducesResponseType(typeof(Student), 200)]
+        [Authorize(Roles = $"{RoleConstants.Admin}, {RoleConstants.Teacher}")]
         public async Task<IActionResult> GetStudentById(int id)
         {
             var student = await _repo.GetStudentById(id);
@@ -190,20 +199,16 @@ namespace SchoolApi.API.Controllers
         /// Retrieves all students.
         /// </summary>
         /// <response code="200">Returns the list of students</response>
+        /// <response code="401">Unauthorized access</response>
         /// <response code="404">Student list is empty</response>
         /// <response code="500">Error in pagination</response>
         /// <returns>A list of all students.</returns>
         [HttpGet("getStudents")]
-        [Authorize(Roles = "Admin, Teacher")]
+        [Authorize(Roles = $"{RoleConstants.Admin}, {RoleConstants.Teacher}")]
         [ProducesResponseType(typeof(IEnumerable<Student>), 200)]
         public async Task<IActionResult> GetAllStudents()
         {
             var students = await _repo.GetAllStudents();
-            if (students == null || !students.Any())
-            {
-                return NotFound(ErrorMsgConstant.StudentListEmpty);
-            }
-            
             return Ok(students);
         }
     }

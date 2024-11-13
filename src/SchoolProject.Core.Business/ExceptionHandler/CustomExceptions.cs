@@ -1,4 +1,4 @@
-namespace SchoolProject.StudentModule.API.ExceptionHandler
+namespace SchoolProject.Core.Business.ExceptionHandler
 {
     public class EmailAlreadyRegistered : Exception
     {
