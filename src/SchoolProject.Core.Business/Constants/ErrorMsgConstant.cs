@@ -20,5 +20,8 @@ namespace SchoolProject.Core.Business.Constants
         public const string StudentAlreadyDeleted = "Couldn't delete student as it's is already deleted.";
         public const string EmailAlreadyExists = "Email already exists";
         public const string InternalError = "Custom internal server error ";
+        public const string UnauthorizedAccessException = "Unauthorized access";
+        public const string InvalidSignature = "Invalid signature";
+        public const string InvalidFormat = "Invalid format";
     }
 }

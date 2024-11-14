@@ -13,5 +13,17 @@ namespace SchoolProject.Core.Business.ExceptionHandler
         {
         }
     }
+    public class InvalidSignature : Exception
+    {
+        public InvalidSignature(string message) : base(message)
+        {
+        }
+    }
+    public class InvalidFormat : Exception
+    {
+        public InvalidFormat(string message) : base(message)
+        {
+        }
+    }
 
 }
