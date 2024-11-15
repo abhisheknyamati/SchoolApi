@@ -11,7 +11,6 @@ namespace SchoolProject.UserModule.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [ServiceFilter(typeof(ModelValidationFilter))]
     public class UserController : ControllerBase
     {
         private readonly IUserRepo _userRepo;

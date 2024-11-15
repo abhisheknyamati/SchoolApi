@@ -27,12 +27,13 @@
     <PackageReference Include="Serilog.Exceptions" Version="8.4.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="8.0.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\SchoolProject.StudentModule.Business\SchoolProject.StudentModule.Business.csproj" />
+    <ProjectReference Include="..\SchoolProject.Core.Business\SchoolProject.Core.Business.csproj" />
   </ItemGroup>
 
 </Project>

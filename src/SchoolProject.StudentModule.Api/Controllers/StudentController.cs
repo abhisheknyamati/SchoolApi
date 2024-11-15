@@ -204,7 +204,7 @@ namespace SchoolProject.StudentModule.API.Controllers
         /// <response code="500">Error in pagination</response>
         /// <returns>A list of all students.</returns>
         [HttpGet("getStudents")]
-        [Authorize(Roles = $"{RoleConstants.Admin}, {RoleConstants.Teacher}")]
+        // [Authorize(Roles = $"{RoleConstants.Admin}, {RoleConstants.Teacher}")]
         [ProducesResponseType(typeof(IEnumerable<Student>), 200)]
         public async Task<IActionResult> GetAllStudents()
         {

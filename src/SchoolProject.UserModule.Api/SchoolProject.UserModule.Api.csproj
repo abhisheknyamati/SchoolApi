@@ -16,11 +16,12 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.2" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\SchoolProject.UserModule.Business\SchoolProject.UserModule.Business.csproj" />
+    <ProjectReference Include="..\SchoolProject.Core.Business\SchoolProject.Core.Business.csproj" />
   </ItemGroup>
 
 </Project>
