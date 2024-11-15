@@ -82,11 +82,11 @@
     "SwaggerEndPoints": [
     {
       "Key": "studentService",
-      "Config": [{ "Name": "Student API", "Version": "v1", "Url": "http://studentService:5207/swagger/v1/swagger.json" }]
+      "Config": [{ "Name": "Student API", "Version": "v1", "Url": "http://schoolprojectstudentmoduleapi:5207/swagger/v1/swagger.json" }]
     },
     {
       "Key": "authService",
-      "Config": [{ "Name": "Auth API", "Version": "v1", "Url": "http://authService:5124/swagger/v1/swagger.json" }]
+      "Config": [{ "Name": "Auth API", "Version": "v1", "Url": "http://schoolprojectusermoduleapi:5124/swagger/v1/swagger.json" }]
     }
   ]
 }
