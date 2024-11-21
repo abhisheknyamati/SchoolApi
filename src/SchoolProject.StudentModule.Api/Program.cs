@@ -7,10 +7,16 @@ using SchoolProject.StudentModule.Business.Services;
 using SchoolProject.StudentModule.Business.Services.Interfaces;
 using SchoolProject.StudentModule.Api.Mappers;
 using SchoolProject.StudentModule.Api.Validators;
-using SchoolProject.StudentModule.API.ExceptionHandler;
 using SchoolProject.Core.Business;
+using HealthChecks.UI.Client;
+using HealthChecks.UI.Configuration;
+using System.Net;
+using MediatR;
+using SchoolProject.StudentModule.Api.Handlers;
 
 var builder = WebApplication.CreateBuilder(args);
+
+ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
 // Log.Logger = new LoggerConfiguration()
 //     .MinimumLevel.Debug()
@@ -21,12 +27,14 @@ var builder = WebApplication.CreateBuilder(args);
 //     .CreateLogger();
 // builder.Host.UseSerilog();
 
-
+builder.Services.AddMediatR(typeof(GetStudentListHandler).Assembly);
+ 
 builder.Services.AddCommonServices(builder.Configuration);
 builder.Services.AddSwagger(builder.Configuration);
 builder.Services.AddExceptionHandling();
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddDbContextRef<StudentModuleDbContext>(builder.Configuration);
+builder.Services.ConfigureHealthChecks(builder.Configuration);
 
 builder.Services.AddScoped<IStudentRepo, StudentRepo>();
 builder.Services.AddScoped<IStudentService, StudentService>();
@@ -50,11 +58,23 @@ if (app.Environment.IsDevelopment())
 
 // app.UseSerilogRequestLogging();
 
+
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+app.MapHealthChecks("/api/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions()
+{
+    Predicate = _ => true,
+    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+});
+app.UseHealthChecksUI(delegate (Options options) 
+{
+    options.UIPath = "/healthcheck-ui";
+    options.ApiPath = "/healthcheck-api";
+});
 
 app.MapControllers();
 
