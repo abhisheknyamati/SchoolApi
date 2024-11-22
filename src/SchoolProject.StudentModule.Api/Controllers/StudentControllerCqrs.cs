@@ -57,5 +57,12 @@ namespace SchoolProject.StudentModule.Api.Controllers
         {
             return await mediator.Send(new DeleteStudentCommand(){ Id = id} );
         }
+
+        [HttpPut]
+        public async Task<Student> UpdateStudentAsync(int id, UpdateStudentDto student)
+        {
+            var updatedStudent = await mediator.Send(new UpdateStudentCommand(id, student));
+            return updatedStudent;
+        }
     }
 }
