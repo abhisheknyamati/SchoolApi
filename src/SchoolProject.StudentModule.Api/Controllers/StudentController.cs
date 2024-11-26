@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using SchoolProject.StudentModule.Api.Filter;
 using SchoolProject.StudentModule.Api.Constants;
 using SchoolProject.StudentModule.API.Constants;
+using SchoolProject.Core.Business.Repositories.Interface;
 
 namespace SchoolProject.StudentModule.API.Controllers
 {
@@ -20,12 +21,14 @@ namespace SchoolProject.StudentModule.API.Controllers
         private readonly IStudentRepo _repo;
         private readonly IStudentService _service;
         private readonly IMapper _mapper;
+        private readonly IGenericRepository<Student> _genericRepo;
 
-        public StudentController(IStudentRepo repo, IMapper mapper, IStudentService service)
+        public StudentController(IStudentRepo repo, IMapper mapper, IStudentService service, IGenericRepository<Student> genericRepo)
         {
             _repo = repo;
             _mapper = mapper;
             _service = service;
+            _genericRepo = genericRepo;
         }
 
         /// <summary>
@@ -54,7 +57,7 @@ namespace SchoolProject.StudentModule.API.Controllers
             {
                 throw new EmailAlreadyRegistered(ErrorMsgConstant.EmailAlreadyExists);
             }
-            var addedStudent = await _repo.AddStudent(student);
+            var addedStudent = await _genericRepo.AddAsync(student);
             if (addedStudent == null)
             {
                 throw new Exception(ErrorMsgConstant.StudentNotCreated);
@@ -77,16 +80,16 @@ namespace SchoolProject.StudentModule.API.Controllers
         [Authorize(Roles = RoleConstants.Admin)]
         public async Task<ActionResult> DeleteStudent(int studentId)
         {
-            var requiredStudent = await _repo.GetStudentById(studentId);
+            var requiredStudent = await _genericRepo.GetByIdAsync(studentId);
             if (requiredStudent == null)
             {
                 return NotFound(ErrorMsgConstant.StudentNotFound);
             }
-            var success = await _repo.DeleteStudent(requiredStudent);
-            if (!success)
-            {
-                throw new StudentAlreadyDeleted(ErrorMsgConstant.StudentAlreadyDeleted);
-            }
+            var success = await _genericRepo.DeleteAsync(requiredStudent);
+            // if (!success)
+            // {
+            //     throw new StudentAlreadyDeleted(ErrorMsgConstant.StudentAlreadyDeleted);
+            // }
             var response = _mapper.Map<GetStudentDto>(requiredStudent);
             return Ok(response);
         }
@@ -108,7 +111,7 @@ namespace SchoolProject.StudentModule.API.Controllers
         [Authorize(Roles = RoleConstants.Admin)]
         public async Task<IActionResult> UpdateDetails(int id, UpdateStudentDto studentDto)
         {
-            var existingStudent = await _repo.GetStudentById(id);
+            var existingStudent = await _genericRepo.GetByIdAsync(id);
             if (existingStudent == new Student())
             {
                 return NotFound(ErrorMsgConstant.StudentNotFound);
@@ -137,7 +140,7 @@ namespace SchoolProject.StudentModule.API.Controllers
                 throw new EmailAlreadyRegistered(ErrorMsgConstant.EmailAlreadyExists);
             }
 
-            var success = await _repo.UpdateDetails(existingStudent);
+            var success = await _genericRepo.UpdateAsync(existingStudent);
             var response = _mapper.Map<GetStudentDto>(success);
             return Ok(response);
         }
@@ -186,7 +189,8 @@ namespace SchoolProject.StudentModule.API.Controllers
         [Authorize(Roles = $"{RoleConstants.Admin}, {RoleConstants.Teacher}")]
         public async Task<IActionResult> GetStudentById(int id)
         {
-            var student = await _repo.GetStudentById(id);
+            var student = await _genericRepo.GetByIdAsync(id);
+            // var student = await _repo.GetStudentById(id);
             if (student == null)
             {
                 return NotFound(ErrorMsgConstant.StudentNotFound);
@@ -208,7 +212,8 @@ namespace SchoolProject.StudentModule.API.Controllers
         [ProducesResponseType(typeof(IEnumerable<Student>), 200)]
         public async Task<IActionResult> GetAllStudents()
         {
-            var students = await _repo.GetAllStudents();
+            // var students = await _repo.GetAllStudents();
+            var students = await _genericRepo.GetAllAsync();
             return Ok(students);
         }
     }

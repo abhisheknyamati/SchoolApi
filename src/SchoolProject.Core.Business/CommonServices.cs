@@ -141,13 +141,35 @@ namespace SchoolProject.Core.Business
             });
         }
 
+        public static void AddDbContextReadWriteRef<T>(this IServiceCollection services, IConfiguration configuration) where T : DbContext
+        {
+            string connectionString;
+            services.AddDbContext<T>((serviceProvider, options) =>
+            {
+                var httpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
+                if (httpContextAccessor.HttpContext?.Request.Method == HttpMethods.Get)
+                {
+                    connectionString = configuration.GetConnectionString("SlaveDB");
+                }
+                else
+                {
+                    connectionString = configuration.GetConnectionString("MasterDB");
+                }
+                var serverVersion = ServerVersion.AutoDetect(connectionString);
+                options.UseMySql(connectionString, serverVersion)
+                       .EnableDetailedErrors()
+                       .EnableSensitiveDataLogging();
+            });
+        }
+
         public static void ConfigureHealthChecks(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddHealthChecks()
-                .AddMySql(configuration["ConnectionStrings:Localhost"], healthQuery: "select 1", name: "SQL servere", failureStatus: HealthStatus.Unhealthy, tags: new[] { "Feedback", "Database" })
+                .AddMySql(configuration["ConnectionStrings:Localhost"], healthQuery: "select 1", name: "SQL servere",
+                failureStatus: HealthStatus.Unhealthy, tags: new[] { "Feedback", "Database" })
                 .AddCheck<RemoteHealthCheck>("Remote endpoints Health Check", failureStatus: HealthStatus.Unhealthy)
                 .AddCheck<MemoryHealthCheck>($"Feedback Service Memory Check", failureStatus: HealthStatus.Unhealthy, tags: new[] { "Feedback Service" });
-                // .AddUrlGroup(new Uri("https://localhost:5207/api/v1/heartbeats/ping"), name: "base URL", failureStatus: HealthStatus.Unhealthy);
+            // .AddUrlGroup(new Uri("https://localhost:5207/api/v1/heartbeats/ping"), name: "base URL", failureStatus: HealthStatus.Unhealthy);
 
             services.AddHealthChecksUI(opt =>
             {

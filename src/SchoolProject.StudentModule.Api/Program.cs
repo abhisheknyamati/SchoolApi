@@ -13,6 +13,8 @@ using HealthChecks.UI.Configuration;
 using System.Net;
 using MediatR;
 using SchoolProject.StudentModule.Api.Handlers;
+using SchoolProject.Core.Business.Repositories.Interface;
+using SchoolProject.Core.Business.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,9 +35,12 @@ builder.Services.AddCommonServices(builder.Configuration);
 builder.Services.AddSwagger(builder.Configuration);
 builder.Services.AddExceptionHandling();
 builder.Services.AddJwtAuthentication(builder.Configuration);
-builder.Services.AddDbContextRef<StudentModuleDbContext>(builder.Configuration);
+// builder.Services.AddDbContextRef<StudentModuleDbContext>(builder.Configuration);
+builder.Services.AddDbContextReadWriteRef<StudentModuleDbContext>(builder.Configuration);
+builder.Services.AddHttpContextAccessor();
 builder.Services.ConfigureHealthChecks(builder.Configuration);
 
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IStudentRepo, StudentRepo>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 
