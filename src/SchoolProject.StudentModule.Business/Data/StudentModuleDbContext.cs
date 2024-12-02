@@ -7,6 +7,9 @@ namespace SchoolProject.StudentModule.Business.Data
     public class StudentModuleDbContext : DbContext
     {
         public DbSet<Student> Students { get; set; }
-        public StudentModuleDbContext(DbContextOptions<StudentModuleDbContext> options) : base(options) { }
+        public StudentModuleDbContext(DbContextOptions<StudentModuleDbContext> options) : base(options)
+        {
+            Students = Set<Student>();
+        }
     }
 }

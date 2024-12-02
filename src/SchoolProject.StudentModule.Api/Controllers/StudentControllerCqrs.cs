@@ -1,5 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Plain.RabbitMQ;
 using SchoolProject.StudentModule.Api.Commands;
 using SchoolProject.StudentModule.Api.DTOs;
 using SchoolProject.StudentModule.Api.Queries;
@@ -15,10 +17,12 @@ namespace SchoolProject.StudentModule.Api.Controllers
     {
         private readonly IMediator mediator;
         private readonly IStudentService service;
-        public StudentControllerCqrs(IMediator mediator, IStudentService service)
+        private readonly Plain.RabbitMQ.IPublisher _publisher;
+        public StudentControllerCqrs(IMediator mediator, IStudentService service, Plain.RabbitMQ.IPublisher publisher)
         {
             this.mediator = mediator;
             this.service = service;
+            _publisher = publisher;
         }
 
         [HttpGet]
@@ -31,7 +35,7 @@ namespace SchoolProject.StudentModule.Api.Controllers
         [HttpGet("{id}")]
         public async Task<Student> GetStudentByIdAsync(int id)
         {
-            var student = await mediator.Send(new GetStudentByIdQuery(){ Id = id });
+            var student = await mediator.Send(new GetStudentByIdQuery() { Id = id });
             return student;
         }
 
@@ -49,13 +53,25 @@ namespace SchoolProject.StudentModule.Api.Controllers
                 gender: (Gender)student.Gender,
                 isActive: true
             ));
+
+            var studentCreatedMessage = new StudentEventMessage
+            {
+                EventType = "created",
+                StudentId = newStudent.Id,
+                StudentName = newStudent.FirstName,
+                StudentEmail = newStudent.Email
+            };
+
+            var message = JsonConvert.SerializeObject(studentCreatedMessage);
+            _publisher.Publish(message, "student.created", null);
+
             return newStudent;
         }
 
         [HttpDelete]
         public async Task<bool> DeleteStudentAsync(int id)
         {
-            return await mediator.Send(new DeleteStudentCommand(){ Id = id} );
+            return await mediator.Send(new DeleteStudentCommand() { Id = id });
         }
 
         [HttpPut]

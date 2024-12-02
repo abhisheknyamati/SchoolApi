@@ -16,6 +16,8 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using SchoolProject.Core.Business.HealthChecker;
+using SchoolProject.Core.Business.Services.Interfaces;
+using SchoolProject.Core.Business.Services;
 
 namespace SchoolProject.Core.Business
 {
@@ -186,6 +188,11 @@ namespace SchoolProject.Core.Business
                 loggingBuilder.AddConsole();
                 loggingBuilder.AddDebug();
             });
+        }
+    
+        public static void AddEmailService(this IServiceCollection services)
+        {
+            services.AddSingleton<IEmailService, EmailService>();
         }
     }
 }

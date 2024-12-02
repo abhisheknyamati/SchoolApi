@@ -15,6 +15,9 @@ using MediatR;
 using SchoolProject.StudentModule.Api.Handlers;
 using SchoolProject.Core.Business.Repositories.Interface;
 using SchoolProject.Core.Business.Repositories;
+using Plain.RabbitMQ;
+using RabbitMQ.Client;
+using SchoolProject.StudentModule.Api.Listener;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,8 +38,28 @@ builder.Services.AddCommonServices(builder.Configuration);
 builder.Services.AddSwagger(builder.Configuration);
 builder.Services.AddExceptionHandling();
 builder.Services.AddJwtAuthentication(builder.Configuration);
-// builder.Services.AddDbContextRef<StudentModuleDbContext>(builder.Configuration);
-builder.Services.AddDbContextReadWriteRef<StudentModuleDbContext>(builder.Configuration);
+builder.Services.AddDbContextRef<StudentModuleDbContext>(builder.Configuration);
+// builder.Services.AddDbContextReadWriteRef<StudentModuleDbContext>(builder.Configuration);
+
+builder.Services.AddEmailService();
+builder.Services.AddSingleton<IConnectionProvider>(new ConnectionProvider("amqp://guest:guest@localhost:5672"));
+builder.Services.AddSingleton<Plain.RabbitMQ.IPublisher>(p => new Publisher(
+    p.GetService<IConnectionProvider>(),
+    "student.exchange",   // Exchange name
+    ExchangeType.Topic  // Exchange Type
+));
+
+// Register the Subscriber 
+builder.Services.AddSingleton<ISubscriber>(s => new Subscriber(
+    s.GetService<IConnectionProvider>(),
+    "student.exchange",  // The exchange to subscribe to
+    "student.event.queue",   // The queue name
+    "student.*",   // The routing key to listen to
+    ExchangeType.Topic  // Exchange type
+));
+
+builder.Services.AddHostedService<StudentEventEmailListener>();
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.ConfigureHealthChecks(builder.Configuration);
 
