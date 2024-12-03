@@ -1,24 +1,30 @@
-using FluentValidation;
-using Serilog;
-using SchoolProject.StudentModule.Business.Data;
-using SchoolProject.StudentModule.Business.Repositories.Interfaces;
-using SchoolProject.StudentModule.Business.Repositories;
-using SchoolProject.StudentModule.Business.Services;
-using SchoolProject.StudentModule.Business.Services.Interfaces;
-using SchoolProject.StudentModule.Api.Mappers;
-using SchoolProject.StudentModule.Api.Validators;
-using SchoolProject.Core.Business;
+using System.Net;
 using HealthChecks.UI.Client;
 using HealthChecks.UI.Configuration;
-using System.Net;
 using MediatR;
-using SchoolProject.StudentModule.Api.Handlers;
-using SchoolProject.Core.Business.Repositories.Interface;
-using SchoolProject.Core.Business.Repositories;
-using SchoolProject.Core.Business.Services.Interfaces;
 using Plain.RabbitMQ;
 using RabbitMQ.Client;
+using Serilog;
+using FluentValidation;
+
+using SchoolProject.Core.Business;
+using SchoolProject.Core.Business.Repositories;
+using SchoolProject.Core.Business.Repositories.Interfaces;
+using SchoolProject.Core.Business.Services;
+using SchoolProject.Core.Business.Services.Interfaces;
+using SchoolProject.Core.Business.Data;
+
+// using SchoolProject.StudentModule.Api.Handlers;
 using SchoolProject.StudentModule.Api.Listener;
+using SchoolProject.StudentModule.Api.Mappers;
+using SchoolProject.StudentModule.Api.Validators;
+using SchoolProject.StudentModule.Business.Handlers;
+// using SchoolProject.StudentModule.Business.Data;
+// using SchoolProject.StudentModule.Business.Repositories;
+// using SchoolProject.StudentModule.Business.Repositories.Interfaces;
+// using SchoolProject.StudentModule.Business.Services;
+// using SchoolProject.StudentModule.Business.Services.Interfaces;
+
 
 var builder = WebApplication.CreateBuilder(args);
 

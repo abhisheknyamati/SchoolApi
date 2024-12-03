@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using SchoolProject.StudentModule.Api.DTOs;
-using SchoolProject.StudentModule.Business.Models;
+using SchoolProject.Core.Business.Models;
 
 namespace SchoolProject.StudentModule.Api.Mappers
 {
@@ -10,6 +10,7 @@ namespace SchoolProject.StudentModule.Api.Mappers
         {
             CreateMap<Student, AddStudentDto>().ReverseMap();
             CreateMap<Student, GetStudentDto>().ReverseMap();
+            CreateMap<Student, UpdateStudentDto>().ReverseMap();
         }
     }
 }

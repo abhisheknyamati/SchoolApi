@@ -1,18 +1,16 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using AutoMapper;
-using SchoolProject.StudentModule.Business.Repositories.Interfaces;
-using SchoolProject.StudentModule.Business.Services.Interfaces;
-using SchoolProject.StudentModule.Business.Models;
-using SchoolProject.StudentModule.Business.Pagination;
+using SchoolProject.Core.Business.Repositories.Interfaces;
+using SchoolProject.Core.Business.Models;
+using SchoolProject.Core.Business.Pagination;
 using SchoolProject.StudentModule.API.ExceptionHandler;
 using SchoolProject.StudentModule.Api.DTOs;
 using Microsoft.AspNetCore.Authorization;
-using SchoolProject.StudentModule.Api.Filter;
 using SchoolProject.StudentModule.Api.Constants;
 using SchoolProject.StudentModule.API.Constants;
-using SchoolProject.Core.Business.Repositories.Interface;
 using Plain.RabbitMQ;
 using Newtonsoft.Json;
+using SchoolProject.Core.Business.Services.Interfaces;
 
 namespace SchoolProject.StudentModule.API.Controllers
 {

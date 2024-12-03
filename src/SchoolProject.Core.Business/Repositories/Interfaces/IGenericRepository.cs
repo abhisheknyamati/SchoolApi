@@ -1,5 +1,5 @@
 
-namespace SchoolProject.Core.Business.Repositories.Interface
+namespace SchoolProject.Core.Business.Repositories.Interfaces
 {
     public interface IGenericRepository<T> where T : class
     {

@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 using SchoolProject.StudentModule.Api.DTOs;
-using SchoolProject.StudentModule.Business.Models.ENUM;
+using SchoolProject.Core.Business.Models.ENUM;
 
 namespace SchoolProject.StudentModule.Api.Validators
 {

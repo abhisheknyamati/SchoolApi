@@ -1,7 +1,7 @@
 using MediatR;
-using SchoolProject.StudentModule.Business.Models;
+using SchoolProject.Core.Business.Models;
 
-namespace SchoolProject.StudentModule.Api.Queries
+namespace SchoolProject.StudentModule.Business.Queries
 {
     public class GetStudentListQuery : IRequest<IEnumerable<Student>>
     {

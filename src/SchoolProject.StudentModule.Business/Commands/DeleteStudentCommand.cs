@@ -1,6 +1,6 @@
 using MediatR;
 
-namespace SchoolProject.StudentModule.Api.Commands
+namespace SchoolProject.Core.Business.Commands
 {
     public class DeleteStudentCommand : IRequest<bool>
     {

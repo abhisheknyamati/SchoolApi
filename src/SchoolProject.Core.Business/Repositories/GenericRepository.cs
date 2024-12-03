@@ -1,7 +1,7 @@
 
 using Microsoft.EntityFrameworkCore;
-using SchoolProject.Core.Business.Repositories.Interface;
-using SchoolProject.StudentModule.Business.Data;
+using SchoolProject.Core.Business.Repositories.Interfaces;
+using SchoolProject.Core.Business.Data;
 
 namespace SchoolProject.Core.Business.Repositories
 {

@@ -1,5 +1,5 @@
 using System.Text.Json.Serialization;
-using SchoolProject.StudentModule.Business.Models.ENUM;
+using SchoolProject.Core.Business.Models.ENUM;
 
 namespace SchoolProject.StudentModule.Api.DTOs
 {
