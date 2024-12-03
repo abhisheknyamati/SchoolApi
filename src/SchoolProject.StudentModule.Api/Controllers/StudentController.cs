@@ -11,6 +11,8 @@ using SchoolProject.StudentModule.Api.Filter;
 using SchoolProject.StudentModule.Api.Constants;
 using SchoolProject.StudentModule.API.Constants;
 using SchoolProject.Core.Business.Repositories.Interface;
+using Plain.RabbitMQ;
+using Newtonsoft.Json;
 
 namespace SchoolProject.StudentModule.API.Controllers
 {
@@ -22,13 +24,15 @@ namespace SchoolProject.StudentModule.API.Controllers
         private readonly IStudentService _service;
         private readonly IMapper _mapper;
         private readonly IGenericRepository<Student> _genericRepo;
+        private readonly IPublisher _publisher;
 
-        public StudentController(IStudentRepo repo, IMapper mapper, IStudentService service, IGenericRepository<Student> genericRepo)
+        public StudentController(IStudentRepo repo, IMapper mapper, IStudentService service, IGenericRepository<Student> genericRepo, IPublisher publisher)
         {
             _repo = repo;
             _mapper = mapper;
             _service = service;
             _genericRepo = genericRepo;
+            _publisher = publisher;
         }
 
         /// <summary>
@@ -44,7 +48,7 @@ namespace SchoolProject.StudentModule.API.Controllers
         /// <returns>The details of the newly created student.</returns>
         [HttpPost]
         [ProducesResponseType(typeof(GetStudentDto), 200)]
-        [Authorize(Roles = RoleConstants.Admin)]
+        // [Authorize(Roles = RoleConstants.Admin)]
         public async Task<IActionResult> AddStudent(AddStudentDto studentDto)
         {
             var student = _mapper.Map<Student>(studentDto);
@@ -63,6 +67,18 @@ namespace SchoolProject.StudentModule.API.Controllers
                 throw new Exception(ErrorMsgConstant.StudentNotCreated);
             }
             var response = _mapper.Map<GetStudentDto>(addedStudent);
+
+            var studentCreatedMessage = new StudentEventMessage
+            {
+                EventType = "created",
+                StudentId = addedStudent.Id,
+                StudentName = addedStudent.FirstName + " " + addedStudent.LastName,
+                StudentEmail = addedStudent.Email
+            };
+
+            var message = JsonConvert.SerializeObject(studentCreatedMessage);
+            _publisher.Publish(message, "student.created", null);
+            
             return Ok(response);
         }
 
