@@ -22,7 +22,7 @@ namespace SchoolProject.Core.Business
 {
     public static class CommonServices
     {
-        public static void AddSwagger(this IServiceCollection services, IConfiguration configuration)
+        public static void AddSwagger(this IServiceCollection services, IConfiguration configuration, string xmlPath)
         {
             services.AddSwaggerGen(opt =>
             {
@@ -52,6 +52,7 @@ namespace SchoolProject.Core.Business
                         new string[] { }
                     }
                 });
+                opt.IncludeXmlComments(xmlPath);
             });
         }
 

@@ -50,7 +50,7 @@ namespace SchoolProject.StudentModule.Business.Repositories
 
             if (searchTerm != null)
             {
-                query = query.Where(i => i.FirstName.Contains(searchTerm) || i.LastName.Contains(searchTerm) || i.Age.ToString() == searchTerm || i.Email.Contains(searchTerm));
+                query = query.Where(i => i.FirstName.Contains(searchTerm) || i.LastName.Contains(searchTerm) || i.Email.Contains(searchTerm));
             }
 
             var totalRecords = await query.CountAsync();

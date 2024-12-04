@@ -15,24 +15,17 @@ namespace SchoolProject.StudentModule.Api.Handlers
 
         private readonly IStudentRepo _repo;
         private readonly IStudentService _service;
-        private readonly IMapper _mapper;
 
-        public UpdateStudentHandler(IStudentRepo repo, IStudentService service, IMapper mapper)
+        public UpdateStudentHandler(IStudentRepo repo, IStudentService service)
         {
             _repo = repo;
             _service = service;
-            _mapper = mapper;
         }
         public async Task<Student> Handle(UpdateStudentCommand command, CancellationToken cancellationToken)
         {
             var existingStudent = await _repo.GetStudentById(command.Id);
-            if (existingStudent == null)
-            {
-                // return NotFound(ErrorMsgConstant.StudentNotFound);   // idk why error in exception
-                throw new Exception(ErrorMsgConstant.StudentNotFound);
-            }
 
-            var studentDto = command.StudentDto;
+            var studentDto = command.Student;
 
             if (!string.IsNullOrEmpty(studentDto.FirstName))
                 existingStudent.FirstName = studentDto.FirstName;
@@ -50,12 +43,12 @@ namespace SchoolProject.StudentModule.Api.Handlers
                 existingStudent.Phone = studentDto.Phone;
             if (!string.IsNullOrEmpty(studentDto.Address))
                 existingStudent.Address = studentDto.Address;
-            if (studentDto.Gender.HasValue)
-                existingStudent.Gender = studentDto.Gender.Value;
-            if (studentDto.BirthDate.HasValue)
+            if (studentDto.Gender != null)
+                existingStudent.Gender = studentDto.Gender;
+            if (studentDto.BirthDate != null)
             {
-                existingStudent.BirthDate = studentDto.BirthDate.Value;
-                existingStudent.Age = _service.CalculateAge(studentDto.BirthDate.Value);
+                existingStudent.BirthDate = studentDto.BirthDate;
+                // existingStudent.Age = _service.CalculateAge(studentDto.BirthDate);
             }
 
             var success = await _repo.UpdateDetails(existingStudent);

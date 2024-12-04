@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SchoolProject.StudentModule.Business.Data;
 
@@ -11,9 +12,11 @@ using SchoolProject.StudentModule.Business.Data;
 namespace SchoolProject.StudentModule.Business.Migrations
 {
     [DbContext(typeof(StudentModuleDbContext))]
-    partial class StudentModuleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241204062619_RemovedAgeMigration")]
+    partial class RemovedAgeMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -1,5 +1,4 @@
 using MediatR;
-using SchoolProject.StudentModule.Api.DTOs;
 using SchoolProject.StudentModule.Business.Models;
 
 namespace SchoolProject.StudentModule.Api.Commands
@@ -7,12 +6,12 @@ namespace SchoolProject.StudentModule.Api.Commands
     public class UpdateStudentCommand : IRequest<Student>
     {
         public int Id { get; set; }
-        public UpdateStudentDto StudentDto { get; set; }
+        public Student Student { get; set; }
 
-        public UpdateStudentCommand(int id, UpdateStudentDto studentDto)
+        public UpdateStudentCommand(int id, Student student)
         {
             Id = id;
-            StudentDto = studentDto;
+            Student = student;
         }
     }
 }

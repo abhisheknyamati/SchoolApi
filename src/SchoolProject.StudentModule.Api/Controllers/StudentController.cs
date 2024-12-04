@@ -52,10 +52,6 @@ namespace SchoolProject.StudentModule.API.Controllers
         public async Task<IActionResult> AddStudent(AddStudentDto studentDto)
         {
             var student = _mapper.Map<Student>(studentDto);
-            if (studentDto.BirthDate.HasValue)
-            {
-                student.Age = _service.CalculateAge(studentDto.BirthDate.Value);
-            }
 
             if (_repo.IsDuplicateEmail(student.Email))
             {
@@ -102,11 +98,12 @@ namespace SchoolProject.StudentModule.API.Controllers
                 return NotFound(ErrorMsgConstant.StudentNotFound);
             }
             var success = await _genericRepo.DeleteAsync(requiredStudent);
-            // if (!success)
-            // {
-            //     throw new StudentAlreadyDeleted(ErrorMsgConstant.StudentAlreadyDeleted);
-            // }
+            if (success != null) // generic repo doesnt check active status any more
+            {
+                throw new StudentAlreadyDeleted(ErrorMsgConstant.StudentAlreadyDeleted);
+            }
             var response = _mapper.Map<GetStudentDto>(requiredStudent);
+            response.Age = _service.CalculateAge(requiredStudent.BirthDate);
             return Ok(response);
         }
 
@@ -148,7 +145,7 @@ namespace SchoolProject.StudentModule.API.Controllers
             if (studentDto.BirthDate.HasValue)
             {
                 existingStudent.BirthDate = studentDto.BirthDate.Value;
-                existingStudent.Age = _service.CalculateAge(studentDto.BirthDate.Value);
+                // existingStudent.Age = _service.CalculateAge(studentDto.BirthDate.Value);
             }
 
             if (_repo.IsDuplicateEmail(studentDto.Email))
@@ -212,6 +209,7 @@ namespace SchoolProject.StudentModule.API.Controllers
                 return NotFound(ErrorMsgConstant.StudentNotFound);
             }
             var response = _mapper.Map<GetStudentDto>(student);
+            response.Age = _service.CalculateAge(student.BirthDate);
             return Ok(response);
         }
 

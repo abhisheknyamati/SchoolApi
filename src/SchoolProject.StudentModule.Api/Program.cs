@@ -19,9 +19,10 @@ using SchoolProject.Core.Business.Services.Interfaces;
 using Plain.RabbitMQ;
 using RabbitMQ.Client;
 using SchoolProject.StudentModule.Api.Listener;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
-
+var xmlPath = Path.Combine(AppContext.BaseDirectory, $"{Assembly.GetExecutingAssembly().GetName().Name}.xml");
 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
 // Log.Logger = new LoggerConfiguration()
@@ -52,7 +53,7 @@ builder.Services.AddHostedService<StudentEventEmailListener>();
 builder.Services.AddMediatR(typeof(GetStudentListHandler).Assembly);
  
 builder.Services.AddCommonServices(builder.Configuration);
-builder.Services.AddSwagger(builder.Configuration);
+builder.Services.AddSwagger(builder.Configuration, xmlPath);
 builder.Services.AddExceptionHandling();
 builder.Services.AddJwtAuthentication(builder.Configuration);
 // builder.Services.AddDbContextRef<StudentModuleDbContext>(builder.Configuration);

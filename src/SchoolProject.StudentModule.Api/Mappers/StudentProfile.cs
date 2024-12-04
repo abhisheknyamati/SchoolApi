@@ -10,6 +10,7 @@ namespace SchoolProject.StudentModule.Api.Mappers
         {
             CreateMap<Student, AddStudentDto>().ReverseMap();
             CreateMap<Student, GetStudentDto>().ReverseMap();
+            CreateMap<Student, UpdateStudentDto>().ReverseMap();
         }
     }
 }

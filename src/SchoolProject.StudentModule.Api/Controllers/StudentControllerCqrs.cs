@@ -1,10 +1,10 @@
+using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using SchoolProject.StudentModule.Api.Commands;
 using SchoolProject.StudentModule.Api.DTOs;
 using SchoolProject.StudentModule.Api.Queries;
 using SchoolProject.StudentModule.Business.Models;
-using SchoolProject.StudentModule.Business.Models.ENUM;
 using SchoolProject.StudentModule.Business.Services.Interfaces;
 
 namespace SchoolProject.StudentModule.Api.Controllers
@@ -15,41 +15,42 @@ namespace SchoolProject.StudentModule.Api.Controllers
     {
         private readonly IMediator mediator;
         private readonly IStudentService service;
-        public StudentControllerCqrs(IMediator mediator, IStudentService service)
+        private readonly IMapper mapper;
+        public StudentControllerCqrs(IMediator mediator, IStudentService service, IMapper mapper)
         {
             this.mediator = mediator;
             this.service = service;
+            this.mapper = mapper;
         }
 
         [HttpGet]
-        public async Task<IEnumerable<Student>> GetStudentListAsync()
+        public async Task<IEnumerable<GetStudentDto>> GetStudentListAsync()
         {
             var students = await mediator.Send(new GetStudentListQuery());
-            return students;
+            var getStudentDto = mapper.Map<IEnumerable<GetStudentDto>>(students);
+            foreach (var student in getStudentDto)
+            {
+                student.Age = service.CalculateAge(student.BirthDate);
+            }
+            return getStudentDto;
         }
 
         [HttpGet("{id}")]
-        public async Task<Student> GetStudentByIdAsync(int id)
+        public async Task<GetStudentDto> GetStudentByIdAsync(int id)
         {
             var student = await mediator.Send(new GetStudentByIdQuery(){ Id = id });
-            return student;
+            var studentDto = mapper.Map<GetStudentDto>(student);
+            studentDto.Age = service.CalculateAge(studentDto.BirthDate);
+            return studentDto;
         }
 
         [HttpPost]
-        public async Task<Student> AddStudentAsync(AddStudentDto student)
+        public async Task<GetStudentDto> AddStudentAsync(AddStudentDto student)
         {
-            var newStudent = await mediator.Send(new AddStudentCommand(
-                firstName: student.FirstName,
-                lastName: student.LastName,
-                email: student.Email,
-                phone: student.Phone,
-                address: student.Address,
-                birthDate: (DateTime)student.BirthDate,
-                age: service.CalculateAge((DateTime)student.BirthDate),
-                gender: (Gender)student.Gender,
-                isActive: true
-            ));
-            return newStudent;
+            var studentModule = mapper.Map<Student>(student);
+            var newStudent = await mediator.Send(new AddStudentCommand(studentModule));
+            var getStudentDto = mapper.Map<GetStudentDto>(newStudent);
+            return getStudentDto;
         }
 
         [HttpDelete]
@@ -59,10 +60,13 @@ namespace SchoolProject.StudentModule.Api.Controllers
         }
 
         [HttpPut]
-        public async Task<Student> UpdateStudentAsync(int id, UpdateStudentDto student)
+        public async Task<GetStudentDto> UpdateStudentAsync(int id, UpdateStudentDto student)
         {
-            var updatedStudent = await mediator.Send(new UpdateStudentCommand(id, student));
-            return updatedStudent;
+            var studentModule = mapper.Map<Student>(student);
+            var updatedStudent = await mediator.Send(new UpdateStudentCommand(id, studentModule));
+            var getStudentDto = mapper.Map<GetStudentDto>(updatedStudent);
+            getStudentDto.Age = service.CalculateAge(getStudentDto.BirthDate);
+            return getStudentDto;
         }
     }
 }

@@ -14,20 +14,7 @@ namespace SchoolProject.StudentModule.Api.Handlers
         }
         public Task<Student> Handle(AddStudentCommand request, CancellationToken cancellationToken)
         {
-            var student = new Student
-            {
-                FirstName = request.FirstName,
-                LastName = request.LastName,
-                Email = request.Email,
-                Phone = request.Phone,
-                Address = request.Address,
-                IsActive = request.IsActive,
-                Age = request.Age,
-                BirthDate = request.BirthDate,
-                Gender = request.Gender,
-            };
-
-            return _repo.AddStudent(student);
+            return _repo.AddStudent(request.Student);
         }
     }
 }
