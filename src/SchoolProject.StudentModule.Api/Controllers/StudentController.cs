@@ -49,7 +49,7 @@ namespace SchoolProject.StudentModule.API.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(GetStudentDto), 200)]
         // [Authorize(Roles = RoleConstants.Admin)]
-        public async Task<IActionResult> AddStudent(AddStudentDto studentDto)
+        public async Task<ActionResult<GetStudentDto>> AddStudent(AddStudentDto studentDto)
         {
             var student = _mapper.Map<Student>(studentDto);
 
@@ -89,8 +89,8 @@ namespace SchoolProject.StudentModule.API.Controllers
         /// <returns>The details of the deleted student.</returns>
         [HttpDelete("{StudentId}")]
         [ProducesResponseType(typeof(Student), 200)]
-        [Authorize(Roles = RoleConstants.Admin)]
-        public async Task<ActionResult> DeleteStudent(int studentId)
+        // [Authorize(Roles = RoleConstants.Admin)]
+        public async Task<ActionResult<GetStudentDto>> DeleteStudent(int studentId)
         {
             var requiredStudent = await _genericRepo.GetByIdAsync(studentId);
             if (requiredStudent == null)
@@ -121,11 +121,11 @@ namespace SchoolProject.StudentModule.API.Controllers
         /// <returns>The updated details of the student.</returns>
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(Student), 200)]
-        [Authorize(Roles = RoleConstants.Admin)]
-        public async Task<IActionResult> UpdateDetails(int id, UpdateStudentDto studentDto)
+        // [Authorize(Roles = RoleConstants.Admin)]
+        public async Task<ActionResult<GetStudentDto>> UpdateDetails(int id, UpdateStudentDto studentDto)
         {
             var existingStudent = await _genericRepo.GetByIdAsync(id);
-            if (existingStudent == new Student())
+            if (existingStudent == null)
             {
                 return NotFound(ErrorMsgConstant.StudentNotFound);
             }
@@ -145,7 +145,6 @@ namespace SchoolProject.StudentModule.API.Controllers
             if (studentDto.BirthDate.HasValue)
             {
                 existingStudent.BirthDate = studentDto.BirthDate.Value;
-                // existingStudent.Age = _service.CalculateAge(studentDto.BirthDate.Value);
             }
 
             if (_repo.IsDuplicateEmail(studentDto.Email))
@@ -170,7 +169,7 @@ namespace SchoolProject.StudentModule.API.Controllers
         /// <response code="500">Error in pagination</response>
         /// <returns>A paginated list of students.</returns>
         [HttpGet]
-        [Authorize(Roles = $"{RoleConstants.Admin}, {RoleConstants.Teacher}")]
+        // [Authorize(Roles = $"{RoleConstants.Admin}, {RoleConstants.Teacher}")]
         [ProducesResponseType(typeof(PagedResponse<Student>), 200)]
         public async Task<ActionResult<PagedResponse<Student>>> GetPagedStudents([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 5, [FromQuery] string searchTerm = "")
         {
@@ -199,8 +198,8 @@ namespace SchoolProject.StudentModule.API.Controllers
         /// <returns>The details of the student with the specified ID.</returns>
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(Student), 200)]
-        [Authorize(Roles = $"{RoleConstants.Admin}, {RoleConstants.Teacher}")]
-        public async Task<IActionResult> GetStudentById(int id)
+        // [Authorize(Roles = $"{RoleConstants.Admin}, {RoleConstants.Teacher}")]
+        public async Task<ActionResult<Student>> GetStudentById(int id)
         {
             var student = await _genericRepo.GetByIdAsync(id);
             // var student = await _repo.GetStudentById(id);
@@ -224,11 +223,30 @@ namespace SchoolProject.StudentModule.API.Controllers
         [HttpGet("getStudents")]
         // [Authorize(Roles = $"{RoleConstants.Admin}, {RoleConstants.Teacher}")]
         [ProducesResponseType(typeof(IEnumerable<Student>), 200)]
-        public async Task<IActionResult> GetAllStudents()
+        public async Task<ActionResult<IEnumerable<Student>>> GetAllStudents()
         {
             // var students = await _repo.GetAllStudents();
             var students = await _genericRepo.GetAllAsync();
             return Ok(students);
+        }
+        /// <summary>
+        /// Retrieves a student by email.
+        /// </summary>
+        /// <param name="emailDto"> Enter email address</param>
+        /// <response code="200">Returns the student details</response>
+        /// <response code="400">Validation error</response>
+        /// <response code="401">Unauthorized access</response>
+        /// <response code="404">Student not found</response>
+        /// <returns>The details of the student with the specified email.</returns>
+        [HttpPost("getByEmail")]
+        public async Task<ActionResult<Student?>> GetStudentByEmail(GetByEmailDto emailDto)
+        {
+            var student = await _genericRepo.IsDuplicateEmailAsync(s => s.Email == emailDto.Email);
+            if (student == null)
+            {
+                return NotFound(ErrorMsgConstant.StudentNotFound);
+            }
+            return Ok(student);
         }
     }
 }

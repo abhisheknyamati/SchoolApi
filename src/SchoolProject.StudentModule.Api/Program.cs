@@ -58,8 +58,9 @@ builder.Services.AddExceptionHandling();
 builder.Services.AddJwtAuthentication(builder.Configuration);
 // builder.Services.AddDbContextRef<StudentModuleDbContext>(builder.Configuration);
 builder.Services.AddDbContextReadWriteRef<StudentModuleDbContext>(builder.Configuration);
+// builder.Services.AddDockerDbContextReadWriteRef<StudentModuleDbContext>(builder.Configuration);
 builder.Services.AddHttpContextAccessor();
-builder.Services.ConfigureHealthChecks(builder.Configuration);
+builder.Services.AddHealthChecks(builder.Configuration);
 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IStudentRepo, StudentRepo>();

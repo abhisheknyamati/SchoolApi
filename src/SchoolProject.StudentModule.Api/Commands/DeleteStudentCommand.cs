@@ -1,10 +1,10 @@
 using MediatR;
+using SchoolProject.StudentModule.Business.Models;
 
 namespace SchoolProject.StudentModule.Api.Commands
 {
-    public class DeleteStudentCommand : IRequest<bool>
+    public class DeleteStudentCommand(Student student) : IRequest<Student>
     {
-        public int Id {get; set;}
-      
+        public Student Student { get; set; } = student;      
     }
 }

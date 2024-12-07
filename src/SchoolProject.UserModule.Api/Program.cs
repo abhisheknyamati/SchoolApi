@@ -1,3 +1,4 @@
+using System.Reflection;
 using FluentValidation;
 using SchoolProject.Core.Business;
 using SchoolProject.StudentModule.Api.Mappers;
@@ -9,8 +10,8 @@ using SchoolProject.UserModule.Business.Services;
 using SchoolProject.UserModule.Business.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddSwagger(builder.Configuration);
+var xmlPath = Path.Combine(AppContext.BaseDirectory, $"{Assembly.GetExecutingAssembly().GetName().Name}.xml");
+builder.Services.AddSwagger(builder.Configuration, xmlPath);
 builder.Services.AddCommonServices(builder.Configuration);
 builder.Services.AddExceptionHandling();
 builder.Services.AddJwtAuthentication(builder.Configuration);

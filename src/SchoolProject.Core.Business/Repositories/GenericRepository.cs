@@ -1,4 +1,5 @@
 
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using SchoolProject.Core.Business.Repositories.Interface;
 using SchoolProject.StudentModule.Business.Data;
@@ -35,7 +36,6 @@ namespace SchoolProject.Core.Business.Repositories
             return entity;
         }
 
-
         public async Task<T?> GetByIdAsync(int id)
         {
             return await _dbSet.FindAsync(id);
@@ -46,6 +46,29 @@ namespace SchoolProject.Core.Business.Repositories
             _dbSet.Update(entity);
             await _context.SaveChangesAsync();
             return entity;
+        }
+
+        public async Task<T?> IsDuplicateEmailAsync(Expression<Func<T, bool>> emailPredicate)
+        {
+            return await _dbSet.FirstOrDefaultAsync(emailPredicate);
+        }
+
+        public async Task<T?> SoftDeleteAsync(T entity)
+        {
+            var property = typeof(T).GetProperty("IsActive");
+            if (property == null || property.PropertyType != typeof(bool))
+            {
+                throw new InvalidOperationException("The entity does not have an 'IsActive' property of type bool.");
+            }
+            var propertyValue = property.GetValue(entity);
+            if (propertyValue != null && propertyValue.Equals(true))
+            {
+                property.SetValue(entity, false);
+                _dbSet.Update(entity);
+                await _context.SaveChangesAsync();
+                return entity;
+            }
+            return null;
         }
     }
 }

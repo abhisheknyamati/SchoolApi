@@ -10,7 +10,7 @@ using SchoolProject.StudentModule.Business.Services.Interfaces;
 
 namespace SchoolProject.StudentModule.Api.Handlers
 {
-    public class UpdateStudentHandler : IRequestHandler<UpdateStudentCommand, Student>
+    public class UpdateStudentHandler : IRequestHandler<UpdateStudentCommand, Student?>
     {
 
         private readonly IStudentRepo _repo;
@@ -21,38 +21,33 @@ namespace SchoolProject.StudentModule.Api.Handlers
             _repo = repo;
             _service = service;
         }
-        public async Task<Student> Handle(UpdateStudentCommand command, CancellationToken cancellationToken)
+        public async Task<Student?> Handle(UpdateStudentCommand command, CancellationToken cancellationToken)
         {
             var existingStudent = await _repo.GetStudentById(command.Id);
 
             var studentDto = command.Student;
 
-            if (!string.IsNullOrEmpty(studentDto.FirstName))
-                existingStudent.FirstName = studentDto.FirstName;
-            if (!string.IsNullOrEmpty(studentDto.LastName))
-                existingStudent.LastName = studentDto.LastName;
-            if (!string.IsNullOrEmpty(studentDto.Email))
+            if (existingStudent != null)
             {
-                if (_repo.IsDuplicateEmail(studentDto.Email))
-                {
-                    throw new EmailAlreadyRegistered(ErrorMsgConstant.EmailAlreadyExists);
-                }
-                existingStudent.Email = studentDto.Email;
-            }
-            if (!string.IsNullOrEmpty(studentDto.Phone))
-                existingStudent.Phone = studentDto.Phone;
-            if (!string.IsNullOrEmpty(studentDto.Address))
-                existingStudent.Address = studentDto.Address;
-            if (studentDto.Gender != null)
-                existingStudent.Gender = studentDto.Gender;
-            if (studentDto.BirthDate != null)
-            {
-                existingStudent.BirthDate = studentDto.BirthDate;
-                // existingStudent.Age = _service.CalculateAge(studentDto.BirthDate);
-            }
+                if (!string.IsNullOrEmpty(studentDto.FirstName))
+                    existingStudent.FirstName = studentDto.FirstName;
+                if (!string.IsNullOrEmpty(studentDto.LastName))
+                    existingStudent.LastName = studentDto.LastName;
+                if (!string.IsNullOrEmpty(studentDto.Email))
+                    existingStudent.Email = studentDto.Email;
+                if (!string.IsNullOrEmpty(studentDto.Phone))
+                    existingStudent.Phone = studentDto.Phone;
+                if (!string.IsNullOrEmpty(studentDto.Address))
+                    existingStudent.Address = studentDto.Address;
+                if (!string.IsNullOrEmpty(studentDto.Gender.ToString()))
+                    existingStudent.Gender = studentDto.Gender;
+                if (!string.IsNullOrEmpty(studentDto.BirthDate.ToString()))
+                    existingStudent.BirthDate = studentDto.BirthDate;
 
-            var success = await _repo.UpdateDetails(existingStudent);
-            return success;
+                var success = await _repo.UpdateDetails(existingStudent);
+                return success;
+            }
+            return null;
         }
     }
 }

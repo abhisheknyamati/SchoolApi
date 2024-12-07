@@ -20,6 +20,14 @@ namespace SchoolProject.UserModule.Api.Controllers
             _adminRepo = adminRepo;
         }
 
+        /// <summary>
+        /// Generate JWT token for user
+        /// </summary>
+        /// <param name="request"> Email Id and password</param>
+        /// <returns> Jwt Token</returns>
+        /// <response code="200">Returns the JWT token</response>
+        /// <response code="400">If the login creadential is invalid</response>
+        /// <exception cref="UnauthorizedAccessException"></exception>
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {

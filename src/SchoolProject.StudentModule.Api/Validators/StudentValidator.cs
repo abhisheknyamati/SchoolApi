@@ -13,7 +13,7 @@ namespace SchoolProject.StudentModule.Api.Validators
             RuleFor(x => x.Email).NotNull().EmailAddress().WithMessage("Please specify a valid email");
             RuleFor(x => x.Phone).NotNull().Length(10).WithMessage("Please specify a valid phone number");
             RuleFor(x => x.Address).NotNull().MaximumLength(30).WithMessage("Please specify a valid address");
-            RuleFor(x => x.Gender).Must(gender => gender == Gender.MALE || gender == Gender.FEMALE || gender == Gender.OTHER || gender == null)
+            RuleFor(x => x.Gender).Must(gender => gender == Gender.MALE || gender == Gender.FEMALE || gender == Gender.OTHER)
             .WithMessage("Gender must be Male, Female, or unspecified.");
             RuleFor(x => x.BirthDate).NotNull().WithMessage("Please enter a valid date");
         }
@@ -35,4 +35,11 @@ namespace SchoolProject.StudentModule.Api.Validators
         }
     }
 
+    public class GetEmailValidator : AbstractValidator<GetByEmailDto>
+    {
+        public GetEmailValidator()
+        {
+            RuleFor(x => x.Email).EmailAddress().WithMessage("Please specify a valid email");
+        }
+    }
 }

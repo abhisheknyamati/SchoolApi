@@ -1,25 +1,26 @@
 using MediatR;
+using SchoolProject.Core.Business.Repositories.Interface;
 using SchoolProject.StudentModule.Api.Commands;
+using SchoolProject.StudentModule.Business.Models;
 using SchoolProject.StudentModule.Business.Repositories.Interfaces;
 
 namespace SchoolProject.StudentModule.Api.Handlers
 {
-    public class DeleteStudentHandler: IRequestHandler<DeleteStudentCommand, bool>
+    public class DeleteStudentHandler: IRequestHandler<DeleteStudentCommand, Student?>
     {
         private readonly IStudentRepo _repo;
-        public DeleteStudentHandler(IStudentRepo repo)
+        private readonly IGenericRepository<Student> _genericRepo;
+        public DeleteStudentHandler(IStudentRepo repo, IGenericRepository<Student> genericRepo)
         {
             _repo = repo;
+            _genericRepo = genericRepo;
         }
 
-        public async Task<bool> Handle(DeleteStudentCommand command, CancellationToken cancellationToken)
+        public async Task<Student?> Handle(DeleteStudentCommand command, CancellationToken cancellationToken)
         {
-            var student = await _repo.GetStudentById(command.Id);
-            if(student == null)
-            {
-                return default;
-            }
-            return await _repo.DeleteStudent(student);
+            // await _repo.DeleteStudent(command.Student);
+            var deletedStudent = await _genericRepo.SoftDeleteAsync(command.Student);
+            return deletedStudent;
         }
     }
 }

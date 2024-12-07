@@ -164,7 +164,33 @@ namespace SchoolProject.Core.Business
             });
         }
 
-        public static void ConfigureHealthChecks(this IServiceCollection services, IConfiguration configuration)
+        public static void AddDockerDbContextReadWriteRef<T>(this IServiceCollection services, IConfiguration configuration) where T : DbContext
+        {
+
+            string? connectionString ;
+
+            var masterConnectionString = Environment.GetEnvironmentVariable("MYSQL_MASTER_CONNECTION_STRING");
+            var slaveConnectionString = Environment.GetEnvironmentVariable("MYSQL_SLAVE_CONNECTION_STRING");
+
+
+            services.AddDbContext<T>((serviceProvider, options) =>
+            {
+                var httpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
+                if (httpContextAccessor.HttpContext?.Request.Method == HttpMethods.Get)
+                {
+                    connectionString = masterConnectionString;
+                }
+                else
+                {
+                    connectionString = slaveConnectionString;
+                }
+                var serverVersion = ServerVersion.AutoDetect(connectionString);
+                options.UseMySql(connectionString, serverVersion)
+                       .EnableDetailedErrors()
+                       .EnableSensitiveDataLogging();
+            });
+        }
+        public static void AddHealthChecks(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddHealthChecks()
                 .AddMySql(configuration["ConnectionStrings:Localhost"], healthQuery: "select 1", name: "SQL servere",
@@ -189,7 +215,7 @@ namespace SchoolProject.Core.Business
                 loggingBuilder.AddDebug();
             });
         }
-    
+
         public static void AddEmailService(this IServiceCollection services)
         {
             services.AddSingleton<IEmailService, EmailService>();
