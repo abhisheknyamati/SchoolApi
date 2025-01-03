@@ -8,7 +8,7 @@ namespace SchoolProject.Core.Business.Repositories.Interface
         Task<IEnumerable<T>> GetAllAsync();
         Task<T?> GetByIdAsync(int id);
         Task<T> AddAsync(T entity);
-        Task<T> UpdateAsync(T entity);
+        Task<T> UpdateAsync(T entity, T updatedEntity);
         Task<T> DeleteAsync(T entity);
         Task<T?> IsDuplicateEmailAsync(Expression<Func<T, bool>> predicate);
         Task<T?> SoftDeleteAsync(T entity);

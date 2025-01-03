@@ -10,16 +10,19 @@ namespace SchoolProject.StudentModule.Api.Handlers
     {
         private readonly IStudentRepo _repo;
         private readonly IGenericRepository<Student> _genericRepo;
-        public GetStudentListHandler(IStudentRepo _repo, IGenericRepository<Student> _genericRepo)
+        private readonly IGenericReadRepository<Student> _genericReadRepo;
+        public GetStudentListHandler(IStudentRepo _repo, IGenericRepository<Student> _genericRepo, IGenericReadRepository<Student> _genericReadRepo)
         {
             this._repo = _repo;
             this._genericRepo = _genericRepo;
+            this._genericReadRepo = _genericReadRepo;
         }
 
         public async Task<IEnumerable<Student>> Handle(GetStudentListQuery request, CancellationToken cancellationToken)
         {
             // return await _repo.GetAllStudents();
-            return await _genericRepo.GetAllAsync();
+            // return await _genericRepo.GetAllAsync();
+            return await _genericReadRepo.GetAllAsync();
         }
     }
 }

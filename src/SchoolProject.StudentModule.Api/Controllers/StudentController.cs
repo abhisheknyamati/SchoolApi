@@ -130,29 +130,31 @@ namespace SchoolProject.StudentModule.API.Controllers
                 return NotFound(ErrorMsgConstant.StudentNotFound);
             }
 
-            if (!string.IsNullOrEmpty(studentDto.FirstName))
-                existingStudent.FirstName = studentDto.FirstName;
-            if (!string.IsNullOrEmpty(studentDto.LastName))
-                existingStudent.LastName = studentDto.LastName;
-            if (!string.IsNullOrEmpty(studentDto.Email))
-                existingStudent.Email = studentDto.Email;
-            if (!string.IsNullOrEmpty(studentDto.Phone))
-                existingStudent.Phone = studentDto.Phone;
-            if (!string.IsNullOrEmpty(studentDto.Address))
-                existingStudent.Address = studentDto.Address;
-            if (studentDto.Gender.HasValue)
-                existingStudent.Gender = studentDto.Gender.Value;
-            if (studentDto.BirthDate.HasValue)
-            {
-                existingStudent.BirthDate = studentDto.BirthDate.Value;
-            }
+            var updatedStudent = _mapper.Map<Student>(studentDto);
+
+            // if (!string.IsNullOrEmpty(studentDto.FirstName))
+            //     existingStudent.FirstName = studentDto.FirstName;
+            // if (!string.IsNullOrEmpty(studentDto.LastName))
+            //     existingStudent.LastName = studentDto.LastName;
+            // if (!string.IsNullOrEmpty(studentDto.Email))
+            //     existingStudent.Email = studentDto.Email;
+            // if (!string.IsNullOrEmpty(studentDto.Phone))
+            //     existingStudent.Phone = studentDto.Phone;
+            // if (!string.IsNullOrEmpty(studentDto.Address))
+            //     existingStudent.Address = studentDto.Address;
+            // if (studentDto.Gender.HasValue)
+            //     existingStudent.Gender = studentDto.Gender.Value;
+            // if (studentDto.BirthDate.HasValue)
+            // {
+            //     existingStudent.BirthDate = studentDto.BirthDate.Value;
+            // }
 
             if (_repo.IsDuplicateEmail(studentDto.Email))
             {
                 throw new EmailAlreadyRegistered(ErrorMsgConstant.EmailAlreadyExists);
             }
 
-            var success = await _genericRepo.UpdateAsync(existingStudent);
+            var success = await _genericRepo.UpdateAsync(existingStudent, updatedStudent);
             var response = _mapper.Map<GetStudentDto>(success);
             return Ok(response);
         }

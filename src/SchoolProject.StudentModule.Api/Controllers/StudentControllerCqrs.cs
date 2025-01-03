@@ -84,7 +84,7 @@ namespace SchoolProject.StudentModule.Api.Controllers
             var newStudent = await mediator.Send(new AddStudentCommand(studentModule));
             var getStudentDto = mapper.Map<GetStudentDto>(newStudent);
             getStudentDto.Age = service.CalculateAge(getStudentDto.BirthDate);
-            return getStudentDto;
+            return Ok(getStudentDto);
         }
         /// <summary>
         /// Delete student by id
@@ -113,7 +113,19 @@ namespace SchoolProject.StudentModule.Api.Controllers
             }
             return NotFound(ErrorMsgConstant.StudentNotFound);
         }
-
+        
+        /// <summary>
+        /// Update student by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="student"></param>
+        /// <response code="200">Returns updated student</response>
+        /// <response code="400">Validation Error</response>
+        /// <response code="401">Unauthorized Access</response>
+        /// <response code="404">If student not found</response>
+        /// <response code="409">If email already exists</response>
+        /// <returns>Updated student</returns>
+        /// <exception cref="EmailAlreadyRegistered"></exception>
         [HttpPut]
         public async Task<ActionResult<GetStudentDto>> UpdateStudent(int id, UpdateStudentDto student)
         {

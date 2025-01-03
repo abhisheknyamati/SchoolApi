@@ -37,7 +37,7 @@ namespace SchoolProject.StudentModule.Business.Repositories
             return false;
         }
 
-        public async Task<Student> UpdateDetails(Student student)
+        public async Task<Student> UpdateDetails(Student student)//wrong
         {
             _context.Students.Update(student);
             await _context.SaveChangesAsync();

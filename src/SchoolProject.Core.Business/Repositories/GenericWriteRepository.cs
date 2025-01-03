@@ -1,25 +1,19 @@
 
-using System.Linq.Expressions;
+
 using Microsoft.EntityFrameworkCore;
 using SchoolProject.Core.Business.Repositories.Interface;
 using SchoolProject.StudentModule.Business.Data;
 
 namespace SchoolProject.Core.Business.Repositories
 {
-    public class GenericRepository<T> : IGenericRepository<T> where T : class
+    public class GenericWriteRepository<T> : IGenericWriteRepository<T> where T : class
     {
-        private readonly StudentModuleDbContext _context;
+        private readonly StudentModuleWriteDbContext _context;
         private readonly DbSet<T> _dbSet;
-
-        public GenericRepository(StudentModuleDbContext context)
+        public GenericWriteRepository(StudentModuleWriteDbContext context)
         {
             _context = context;
             _dbSet = context.Set<T>();
-        }
-
-        public async Task<IEnumerable<T>> GetAllAsync()
-        {
-            return await _dbSet.ToListAsync();
         }
 
         public async Task<T> AddAsync(T entity)
@@ -36,21 +30,11 @@ namespace SchoolProject.Core.Business.Repositories
             return entity;
         }
 
-        public async Task<T?> GetByIdAsync(int id)
-        {
-            return await _dbSet.FindAsync(id);
-        }
-
         public async Task<T> UpdateAsync(T entity, T updatedEntity)
         {
             _context.Entry(entity).CurrentValues.SetValues(updatedEntity);
             await _context.SaveChangesAsync();
             return entity;
-        }
-
-        public async Task<T?> IsDuplicateEmailAsync(Expression<Func<T, bool>> emailPredicate)
-        {
-            return await _dbSet.FirstOrDefaultAsync(emailPredicate);
         }
 
         public async Task<T?> SoftDeleteAsync(T entity)

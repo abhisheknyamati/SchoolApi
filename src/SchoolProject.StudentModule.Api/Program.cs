@@ -20,6 +20,7 @@ using Plain.RabbitMQ;
 using RabbitMQ.Client;
 using SchoolProject.StudentModule.Api.Listener;
 using System.Reflection;
+using SchoolProject.StudentModule.Business.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 var xmlPath = Path.Combine(AppContext.BaseDirectory, $"{Assembly.GetExecutingAssembly().GetName().Name}.xml");
@@ -56,9 +57,16 @@ builder.Services.AddCommonServices(builder.Configuration);
 builder.Services.AddSwagger(builder.Configuration, xmlPath);
 builder.Services.AddExceptionHandling();
 builder.Services.AddJwtAuthentication(builder.Configuration);
-// builder.Services.AddDbContextRef<StudentModuleDbContext>(builder.Configuration);
-builder.Services.AddDbContextReadWriteRef<StudentModuleDbContext>(builder.Configuration);
+builder.Services.AddDbContextRef<StudentModuleDbContext>(builder.Configuration);
+// builder.Services.AddDbContextReadWriteRef<StudentModuleDbContext>(builder.Configuration);
 // builder.Services.AddDockerDbContextReadWriteRef<StudentModuleDbContext>(builder.Configuration);
+
+
+builder.Services.AddScoped<IGenericReadRepository<Student>, GenericReadRepository<Student>>();
+builder.Services.AddScoped<IGenericWriteRepository<Student>, GenericWriteRepository<Student>>();
+builder.Services.AddWriteDbContextRef<StudentModuleWriteDbContext>(builder.Configuration);
+builder.Services.AddReadDbContextRef<StudentModuleReadDbContext>(builder.Configuration);
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHealthChecks(builder.Configuration);
 

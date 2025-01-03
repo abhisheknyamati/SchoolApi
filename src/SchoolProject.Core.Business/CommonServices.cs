@@ -143,6 +143,27 @@ namespace SchoolProject.Core.Business
             });
         }
 
+        public static void AddReadDbContextRef<T>(this IServiceCollection services, IConfiguration configuration) where T : DbContext
+        {
+            var serverVersion = ServerVersion.AutoDetect(configuration.GetConnectionString("SlaveDB"));
+            services.AddDbContext<T>(options =>
+            {
+                options.UseMySql(configuration.GetConnectionString("SlaveDB"), serverVersion)
+                       .EnableDetailedErrors()
+                       .EnableSensitiveDataLogging();
+            });
+        }
+        public static void AddWriteDbContextRef<T>(this IServiceCollection services, IConfiguration configuration) where T : DbContext
+        {
+            var serverVersion = ServerVersion.AutoDetect(configuration.GetConnectionString("MasterDB"));
+            services.AddDbContext<T>(options =>
+            {
+                options.UseMySql(configuration.GetConnectionString("MasterDB"), serverVersion)
+                       .EnableDetailedErrors()
+                       .EnableSensitiveDataLogging();
+            });
+        }
+
         public static void AddDbContextReadWriteRef<T>(this IServiceCollection services, IConfiguration configuration) where T : DbContext
         {
             string connectionString;
@@ -197,8 +218,7 @@ namespace SchoolProject.Core.Business
                 failureStatus: HealthStatus.Unhealthy, tags: new[] { "Feedback", "Database" })
                 .AddCheck<RemoteHealthCheck>("Remote endpoints Health Check", failureStatus: HealthStatus.Unhealthy)
                 .AddCheck<MemoryHealthCheck>($"Feedback Service Memory Check", failureStatus: HealthStatus.Unhealthy, tags: new[] { "Feedback Service" });
-            // .AddUrlGroup(new Uri("https://localhost:5207/api/v1/heartbeats/ping"), name: "base URL", failureStatus: HealthStatus.Unhealthy);
-
+            
             services.AddHealthChecksUI(opt =>
             {
                 opt.SetEvaluationTimeInSeconds(20); //time in seconds between check    
@@ -206,7 +226,6 @@ namespace SchoolProject.Core.Business
                 opt.SetApiMaxActiveRequests(1); //api requests concurrency    
                 opt.AddHealthCheckEndpoint("feedback api", "http://localhost:5207/api/health"); //map health check api    
             })
-            // .AddMySqlStorage(configuration["ConnectionStrings:HealthChecksUI"]);
             .AddInMemoryStorage();
 
             services.AddLogging(loggingBuilder =>
