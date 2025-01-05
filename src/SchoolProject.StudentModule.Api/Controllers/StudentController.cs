@@ -62,7 +62,9 @@ namespace SchoolProject.StudentModule.API.Controllers
             {
                 throw new Exception(ErrorMsgConstant.StudentNotCreated);
             }
+
             var response = _mapper.Map<GetStudentDto>(addedStudent);
+            response.Age = _service.CalculateAge(addedStudent.BirthDate);
 
             var studentCreatedMessage = new StudentEventMessage
             {
@@ -73,7 +75,7 @@ namespace SchoolProject.StudentModule.API.Controllers
             };
 
             var message = JsonConvert.SerializeObject(studentCreatedMessage);
-            _publisher.Publish(message, "student.created", null);
+            // _publisher.Publish(message, "student.created", null);
             
             return Ok(response);
         }
@@ -155,6 +157,7 @@ namespace SchoolProject.StudentModule.API.Controllers
 
             var success = await _genericRepo.UpdateAsync(existingStudent);
             var response = _mapper.Map<GetStudentDto>(success);
+            response.Age = _service.CalculateAge(success.BirthDate);
             return Ok(response);
         }
 

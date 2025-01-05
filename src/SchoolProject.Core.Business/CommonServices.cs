@@ -178,7 +178,7 @@ namespace SchoolProject.Core.Business
                 opt.SetEvaluationTimeInSeconds(20); //time in seconds between check    
                 opt.MaximumHistoryEntriesPerEndpoint(60); //maximum history of checks    
                 opt.SetApiMaxActiveRequests(1); //api requests concurrency    
-                opt.AddHealthCheckEndpoint("feedback api", "http://localhost:5207/api/health"); //map health check api    
+                opt.AddHealthCheckEndpoint("feedback api", "http://localhost:5000/api/health"); //map health check api    
             })
             // .AddMySqlStorage(configuration["ConnectionStrings:HealthChecksUI"]);
             .AddInMemoryStorage();

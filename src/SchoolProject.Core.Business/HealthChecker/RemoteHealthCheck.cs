@@ -17,7 +17,7 @@ namespace SchoolProject.Core.Business.HealthChecker
         {
             using (var httpClient = _httpClientFactory.CreateClient())
             {
-                var response = await httpClient.GetAsync("http://localhost:5207/api/Student/getStudents");
+                var response = await httpClient.GetAsync("http://localhost:5000/api/Student/getStudents");
                 if (response.IsSuccessStatusCode)
                 {
                     return HealthCheckResult.Healthy($"Remote endpoints is healthy.");
