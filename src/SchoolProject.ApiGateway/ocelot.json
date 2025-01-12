@@ -1,99 +1,104 @@
 {
-    "Routes": [
+  "Routes": [
+    {
+      "DownstreamPathTemplate": "/api/Student/getStudents",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
         {
-            "DownstreamPathTemplate": "/api/Student/getStudents",
-            "DownstreamScheme": "http",
-            "ServiceName": "studentService",
-            "UpstreamPathTemplate": "/students/get",
-            "UpstreamHttpMethod": [
-                "GET"
-            ],
-            "SwaggerKey": "studentService"
-        },
-        {
-            "DownstreamPathTemplate": "/api/Student",
-            "DownstreamScheme": "http",
-            "ServiceName": "studentService",
-            "UpstreamPathTemplate": "/student",
-            "UpstreamHttpMethod": [
-                "GET",
-                "POST",
-                "PUT"
-            ],
-            "SwaggerKey": "studentService"
-        },
-        {
-            "DownstreamPathTemplate": "/api/Student/{id}",
-            "DownstreamScheme": "http",
-            "ServiceName": "studentService",
-            "UpstreamPathTemplate": "/student/{id}",
-            "UpstreamHttpMethod": [
-                "GET",
-                "DELETE"
-            ],
-            "SwaggerKey": "studentService"
-        },
-        {
-            "DownstreamPathTemplate": "/api/Auth/login",
-            "DownstreamScheme": "http",
-            "ServiceName": "authService",
-            "UpstreamPathTemplate": "/login",
-            "UpstreamHttpMethod": [
-                "POST"
-            ],
-            "SwaggerKey": "authService"
-        },
-        {
-            "DownstreamPathTemplate": "/api/User",
-            "DownstreamScheme": "http",
-            "ServiceName": "authService",
-            "UpstreamPathTemplate": "/user",
-            "UpstreamHttpMethod": [
-                "GET",
-                "POST"
-            ],
-            "SwaggerKey": "authService"
-        },
-        {
-            "DownstreamPathTemplate": "/api/User/{id}",
-            "DownstreamScheme": "http",
-            "ServiceName": "authService",
-            "UpstreamPathTemplate": "/user/{id}",
-            "UpstreamHttpMethod": [
-                "GET",
-                "DELETE"
-            ],
-            "SwaggerKey": "authService"
+          "Host": "localhost",
+          "Port": 5000
         }
-    ],
-    "SwaggerEndPoints": [
+      ],
+      "UpstreamPathTemplate": "/students/get",
+      "UpstreamHttpMethod": ["GET"],
+      "SwaggerKey": "studentService"
+    },
+    {
+      "DownstreamPathTemplate": "/api/Student",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
         {
-            "Key": "studentService",
-            "Config": [
-                {
-                    "Name": "Student API",
-                    "Version": "v1",
-                    "Url": "http://studentService/swagger/v1/swagger.json"
-                }
-            ]
-        },
+          "Host": "localhost",
+          "Port": 5000
+        }
+      ],
+      "UpstreamPathTemplate": "/student",
+      "UpstreamHttpMethod": ["GET", "POST", "PUT"],
+      "SwaggerKey": "studentService"
+    },
+    {
+      "DownstreamPathTemplate": "/api/Student/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
         {
-            "Key": "authService",
-            "Config": [
-                {
-                    "Name": "Auth API",
-                    "Version": "v1",
-                    "Url": "http://authService/swagger/v1/swagger.json"
-                }
-            ]
+          "Host": "localhost",
+          "Port": 5000
         }
-    ],
-    "GlobalConfiguration": {
-        "BaseUrl": "http://localhost:7000",
-        "ServiceDiscoveryProvider": {
-            "Host": "localhost",
-            "Port": 8500,
-            "Type": "Consul"
+      ],
+      "UpstreamPathTemplate": "/student/{id}",
+      "UpstreamHttpMethod": ["GET", "DELETE"],
+      "SwaggerKey": "studentService"
+    },
+    {
+      "DownstreamPathTemplate": "/api/Auth/login",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5500
         }
+      ],
+      "UpstreamPathTemplate": "/login",
+      "UpstreamHttpMethod": ["POST"],
+      "SwaggerKey": "authService"
+    },
+    {
+      "DownstreamPathTemplate": "/api/User",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5500
+        }
+      ],
+      "UpstreamPathTemplate": "/user",
+      "UpstreamHttpMethod": ["GET", "POST"],
+      "SwaggerKey": "authService"
+    },
+    {
+      "DownstreamPathTemplate": "/api/User/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5500
+        }
+      ],
+      "UpstreamPathTemplate": "/user/{id}",
+      "UpstreamHttpMethod": ["GET", "DELETE"],
+      "SwaggerKey": "authService"
     }
+  ],
+  "SwaggerEndPoints": [
+    {
+      "Key": "studentService",
+      "Config": [
+        {
+          "Name": "Student API",
+          "Version": "v1",
+          "Url": "http://localhost:5000/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "authService",
+      "Config": [
+        {
+          "Name": "Auth API",
+          "Version": "v1",
+          "Url": "http://localhost:5500/swagger/v1/swagger.json"
+        }
+      ]
+    }
+  ]
 }

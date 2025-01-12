@@ -38,35 +38,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Register with Consul
-var consulClient = new ConsulClient(config => config.Address = new Uri("http://localhost:8500"));
-var serviceName = "authService";
-var serviceId = $"{serviceName}-{Guid.NewGuid()}";
-
-var serviceUri = new Uri(app.Urls.FirstOrDefault() ?? "http://localhost:5000");
-var registration = new AgentServiceRegistration
-{
-    ID = serviceId,
-    Name = serviceName,
-    Address = serviceUri.Host,
-    Port = serviceUri.Port,
-    Check = new AgentServiceCheck
-    {
-        HTTP = $"{serviceUri.Scheme}://{serviceUri.Host}:{serviceUri.Port}/health",
-        Interval = TimeSpan.FromSeconds(10),
-        Timeout = TimeSpan.FromSeconds(5),
-        DeregisterCriticalServiceAfter = TimeSpan.FromMinutes(1)
-    }
-};
-
-// Register the service with Consul
-await consulClient.Agent.ServiceRegister(registration);
-
-app.Lifetime.ApplicationStopping.Register(() =>
-{
-    consulClient.Agent.ServiceDeregister(serviceId).Wait();
-});
-
 // Health Check Endpoint
 app.MapGet("/health", () => Results.Ok("Auth Service is healthy"));
 
